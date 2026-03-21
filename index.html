@@ -370,9 +370,9 @@ background:rgba(167,139,250,.15);opacity:0;transition:opacity .1s;
       </div>
       <div class="cam-label" id="camLabel">YOUR CAMERA</div>
       <div class="sim-badge" id="simBadge" style="display:none">⚠ SIM MODE</div>
-      <!-- GooglEii button — bottom-left of camera view -->
+      <!-- GooglEii button — top-left of camera view -->
       <button id="googlyBtn" onclick="toggleGoogly()" style="
-        position:absolute;bottom:52px;left:8px;z-index:15;
+        position:absolute;top:8px;left:8px;z-index:15;
         padding:5px 11px;border-radius:20px;font-size:12px;
         font-weight:800;cursor:pointer;letter-spacing:.01em;
         background:rgba(8,8,20,.75);backdrop-filter:blur(6px);
@@ -1247,7 +1247,7 @@ function drawLandmarksOnCanvas(ctx, lm, W, H) {
   // Face width estimated from shoulder spread; eyes sit above nose
   const shoulderW = Math.abs(rSh.x - lSh.x);
   const faceW     = shoulderW * 0.55;          // rough face-to-shoulder ratio
-  const eyeR      = faceW * 0.16;             // sclera radius
+  const eyeR      = faceW * 0.32;             // sclera radius (doubled from 0.16)
   const eyeSpacing = faceW * 0.28;
   // Eye Y: above nose landmark by ~face-height estimate
   const eyeY  = nose.y - faceW * 0.38;
@@ -1315,7 +1315,7 @@ function drawLandmarksOnCanvas(ctx, lm, W, H) {
 
 // Canvas-based googly eyes — used on left (user) side for both live and sim
 function drawGooglyOnCanvas(ctx, headCx, headCy, headR, phase) {
-  const eyeR      = headR * 0.42;
+  const eyeR      = headR * 0.84;
   const eyeSpacing = headR * 0.62;
   const eyeY      = headCy - headR * 0.1;
 
