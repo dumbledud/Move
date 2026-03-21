@@ -1,1 +1,1229 @@
+<!DOCTYPE html>
 
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MovePR · ANAGAGE</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:#05050a;--surf:#0b0b14;--card:#0f0f1a;--card2:#141422;
+  --bdr:#1c1c2e;--bdr2:#2a2a42;--txt:#e0ddf0;--dim:#5a5a80;--dim2:#3a3a58;
+  --purple:#7c3aed;--purpleL:#a78bfa;--green:#10b981;--greenL:#34d399;
+  --amber:#f59e0b;--amberL:#fcd34d;--blue:#3b82f6;--blueL:#93c5fd;
+  --red:#ef4444;--pink:#ec4899;--cyan:#06b6d4;
+  --mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif;--display:'Bebas Neue',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:var(--sans)}
+
+#nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(–surf);border-top:1px solid var(–bdr);z-index:100}
+.nav-btn{flex:1;padding:10px 0;border:none;background:none;color:var(–dim);font-family:var(–sans);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:color .15s}
+.nav-btn svg{width:18px;height:18px;stroke-width:1.5}
+.nav-btn.active{color:var(–purpleL)}
+.nav-btn.active svg{filter:drop-shadow(0 0 6px #a78bfa80)}
+
+.screen{display:none;height:calc(100vh - 44px);overflow-y:auto;overflow-x:hidden}
+.screen.active{display:block}
+
+/* HOME */
+#home{padding:16px 16px 0}
+.home-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:14px 16px;background:var(–card);border:1px solid var(–bdr);border-radius:14px}
+.logo-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(–purple),var(–cyan));display:flex;align-items:center;justify-content:center;font-family:var(–display);font-size:18px;color:#fff;flex-shrink:0}
+.home-title{font-family:var(–display);font-size:22px;letter-spacing:.05em;color:var(–txt)}
+.home-sub{font-size:9px;color:var(–dim);letter-spacing:.12em;margin-top:2px}
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat-pill{background:var(–card);border:1px solid var(–bdr);border-radius:10px;padding:10px 12px;text-align:center}
+.stat-val{font-family:var(–display);font-size:24px;letter-spacing:.03em}
+.stat-lbl{font-size:8px;color:var(–dim);letter-spacing:.1em;margin-top:2px}
+.routine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding-bottom:16px}
+.rcard{background:var(–card);border:1px solid var(–bdr);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s}
+.rcard:hover{transform:translateY(-2px);border-color:var(–bdr2)}
+.rcard-bar{height:3px;width:100%}
+.rcard-body{padding:12px}
+.rcard-emoji{font-size:22px;margin-bottom:6px}
+.rcard-title{font-weight:700;font-size:13px;margin-bottom:2px}
+.rcard-cat{font-size:9px;color:var(–dim);letter-spacing:.08em;margin-bottom:8px}
+.rcard-pr{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:var(–card2);border-radius:6px;font-size:10px}
+.pr-badge{font-weight:700;font-family:var(–mono)}
+
+/* PRACTICE */
+#practice{padding:0;position:relative}
+.practice-header{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(–surf);border-bottom:1px solid var(–bdr);position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.back-btn{background:none;border:1px solid var(–bdr);color:var(–dim);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(–sans)}
+
+/* ── GooglEii TOGGLE ── */
+.googly-btn{
+display:flex;align-items:center;gap:6px;
+background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.4);
+border-radius:8px;padding:5px 10px;
+cursor:pointer;font-family:var(–sans);
+transition:all .15s;white-space:nowrap;
+}
+.googly-btn.active{
+background:rgba(124,58,237,.35);border-color:var(–purpleL);
+box-shadow:0 0 14px rgba(167,139,250,.45);
+}
+.googly-btn .eye-icon{font-size:14px;transition:transform .2s}
+.googly-btn.active .eye-icon{animation:wobble 0.6s ease infinite alternate}
+@keyframes wobble{from{transform:rotate(-8deg) scale(1)}to{transform:rotate(8deg) scale(1.15)}}
+
+/* GooglEii logo letters */
+.googl-logo{
+font-family:var(–display);font-size:15px;letter-spacing:.01em;
+line-height:1;display:inline-flex;align-items:baseline;
+}
+.googl-logo .gl{color:#a78bfa}  /* G */
+.googl-logo .go1{color:#06b6d4} /* o */
+.googl-logo .go2{color:#10b981} /* o */
+.googl-logo .gg{color:#f59e0b}  /* g */
+.googl-logo .gl2{color:#ec4899;margin-right:-1px} /* l — negative margin pulls E in */
+.googl-logo .gE{color:#ef4444;font-size:17px;line-height:.9} /* E — slightly taller */
+.googl-logo .gi1{color:#3b82f6;font-size:13px} /* i */
+.googl-logo .gi2{color:#34d399;font-size:13px} /* i */
+
+.googly-status{
+font-size:8px;font-weight:700;letter-spacing:.1em;
+padding:1px 5px;border-radius:3px;margin-left:2px;
+background:rgba(90,90,128,.25);color:var(–dim);transition:all .15s;
+}
+.googly-btn.active .googly-status{
+background:rgba(167,139,250,.2);color:var(–purpleL);
+}
+
+.practice-body{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100vh - 90px)}
+.cam-side{position:relative;background:#02020a;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#userVideo{display:none;width:100%;height:100%;object-fit:cover}
+#poseCanvas{width:100%;height:100%;object-fit:cover}
+.cam-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.loading-ring{width:48px;height:48px;border-radius:50%;border:2px solid var(–bdr);border-top-color:var(–purpleL);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.countdown-num{font-family:var(–display);font-size:100px;letter-spacing:.02em;text-shadow:0 0 40px currentColor;animation:pulse 0.8s ease infinite alternate}
+@keyframes pulse{from{opacity:.7}to{opacity:1}}
+.live-score-badge{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border:1px solid var(–bdr);border-radius:12px;padding:8px 16px;text-align:center;min-width:100px}
+.lsb-val{font-family:var(–display);font-size:28px;letter-spacing:.05em}
+.lsb-lbl{font-size:8px;color:var(–dim);letter-spacing:.12em}
+.cam-label{position:absolute;top:10px;left:10px;font-size:8px;letter-spacing:.14em;color:var(–dim);background:rgba(0,0,0,.6);padding:3px 8px;border-radius:4px}
+.sim-badge{position:absolute;top:10px;right:10px;font-size:8px;color:var(–amber);letter-spacing:.1em;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);padding:3px 8px;border-radius:4px}
+
+/* Privacy mode indicator on cam */
+.privacy-badge{
+position:absolute;bottom:16px;right:10px;
+font-size:8px;color:var(–purpleL);letter-spacing:.1em;
+background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.4);
+padding:3px 8px;border-radius:4px;display:none;
+}
+.privacy-badge.visible{display:block}
+
+.target-side{position:relative;background:linear-gradient(135deg,#080614,#050510);border-left:1px solid var(–bdr);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px}
+.target-label{font-size:9px;letter-spacing:.14em;margin-bottom:4px}
+.target-name{font-family:var(–display);font-size:20px;letter-spacing:.05em;text-align:center}
+.pose-dots{display:flex;gap:4px;margin-top:4px}
+.pose-dot{height:3px;border-radius:2px;background:var(–bdr);transition:width .2s}
+#targetSVG{max-width:160px}
+
+.beat-bar{position:absolute;bottom:0;left:0;right:0;height:40px;background:var(–surf);border-top:1px solid var(–bdr);display:flex;align-items:center;padding:0 12px;gap:8px;overflow:hidden}
+.beat-pulse{width:8px;height:8px;border-radius:50%;background:var(–purpleL);flex-shrink:0;transition:transform .05s,opacity .05s}
+.beat-timeline{flex:1;height:24px;position:relative;overflow:hidden}
+.beat-tick{position:absolute;top:0;bottom:0;width:2px;background:var(–bdr2)}
+.beat-tick.on-beat{background:var(–purpleL);box-shadow:0 0 6px var(–purpleL)}
+.beat-tick.user-hit{background:var(–green)}
+.beat-tick.user-miss{background:var(–red)}
+
+.done-panel{position:absolute;inset:0;background:rgba(5,5,10,.95);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;z-index:20}
+.done-panel.visible{display:flex}
+.done-trophy{font-size:60px;animation:trophy .6s ease}
+@keyframes trophy{from{transform:scale(.5) rotate(-10deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.done-title{font-family:var(–display);font-size:36px;letter-spacing:.05em}
+.score-row{display:flex;gap:20px}
+.score-box{text-align:center;padding:16px 20px;background:var(–card);border:1px solid var(–bdr);border-radius:12px;min-width:100px}
+.score-box-val{font-family:var(–display);font-size:40px;letter-spacing:.05em}
+.score-box-lbl{font-size:8px;color:var(–dim);letter-spacing:.12em;margin-top:4px}
+.done-btns{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.btn-primary{padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-family:var(–sans);font-weight:700;font-size:13px;letter-spacing:.04em;background:var(–purple);color:#fff;transition:opacity .15s}
+.btn-primary:hover{opacity:.85}
+.btn-secondary{padding:12px 24px;border-radius:10px;border:1px solid var(–bdr);cursor:pointer;font-family:var(–sans);font-weight:600;font-size:13px;background:var(–card);color:var(–txt);transition:border-color .15s}
+.btn-secondary:hover{border-color:var(–bdr2)}
+
+/* REMIX */
+#remix{padding:16px}
+.remix-header{margin-bottom:16px}
+.remix-title{font-family:var(–display);font-size:28px;letter-spacing:.05em;color:var(–purpleL)}
+.remix-sub{font-size:11px;color:var(–dim);margin-top:2px}
+.remix-stage{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.remix-panel{background:var(–card);border:1px solid var(–bdr);border-radius:12px;padding:14px;display:flex;flex-direction:column;align-items:center}
+.remix-panel-title{font-size:9px;letter-spacing:.14em;margin-bottom:10px;align-self:flex-start}
+.sync-timeline{background:var(–card);border:1px solid var(–bdr);border-radius:12px;padding:14px;margin-bottom:12px}
+.sync-title{font-size:9px;letter-spacing:.14em;margin-bottom:10px;color:var(–dim)}
+.beat-map{display:flex;gap:2px;height:48px;align-items:flex-end}
+.beat-col{flex:1;display:flex;flex-direction:column;gap:2px;align-items:center;position:relative}
+.beat-block{width:100%;border-radius:2px;min-height:4px;transition:height .2s}
+.beat-label{font-size:6px;color:var(–dim);position:absolute;bottom:-14px;white-space:nowrap}
+.remix-controls{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.bpm-control{display:flex;align-items:center;gap:8px;background:var(–card);border:1px solid var(–bdr);border-radius:10px;padding:8px 14px}
+.bpm-lbl{font-size:9px;color:var(–dim);letter-spacing:.1em}
+.bpm-val{font-family:var(–mono);font-size:16px;font-weight:700;color:var(–purpleL);min-width:32px;text-align:center}
+.bpm-btn{background:none;border:1px solid var(–bdr);color:var(–txt);border-radius:6px;width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.sync-score-bar{background:var(–card);border:1px solid var(–bdr);border-radius:12px;padding:14px;margin-bottom:12px}
+.sync-score-row{display:flex;gap:12px;margin-top:10px}
+.sync-metric{flex:1;text-align:center;padding:10px;background:var(–card2);border-radius:8px}
+.sync-metric-val{font-family:var(–display);font-size:26px;letter-spacing:.05em}
+.sync-metric-lbl{font-size:8px;color:var(–dim);letter-spacing:.1em;margin-top:3px}
+.what-if-panel{background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(6,182,212,.06));border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:14px}
+.what-if-title{font-family:var(–display);font-size:18px;letter-spacing:.05em;color:var(–purpleL);margin-bottom:8px}
+.what-if-canvas{width:100%;height:80px;display:block}
+
+/* DASHBOARD */
+#dashboard{padding:16px;padding-bottom:0}
+.db-header{margin-bottom:16px}
+.db-title{font-family:var(–display);font-size:28px;letter-spacing:.05em;color:var(–txt)}
+.db-sub{font-size:9px;color:var(–dim);letter-spacing:.1em;margin-top:2px}
+.tab-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+.db-tab{padding:5px 14px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.06em;border:1px solid var(–bdr);background:var(–card);color:var(–dim);cursor:pointer;white-space:nowrap;transition:all .15s}
+.db-tab.active{background:var(–purple);color:#fff;border-color:var(–purple)}
+.db-panel{display:none}
+.db-panel.active{display:block}
+.chart-card{background:var(–card);border:1px solid var(–bdr);border-radius:12px;padding:14px;margin-bottom:12px}
+.chart-card-title{font-size:9px;letter-spacing:.14em;color:var(–dim);margin-bottom:4px}
+.chart-card-sub{font-size:11px;color:var(–txt);margin-bottom:12px;line-height:1.5}
+.chart-wrap{position:relative}
+.insights-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.insight-card{background:var(–card);border:1px solid var(–bdr);border-radius:12px;padding:12px}
+.insight-label{font-size:8px;color:var(–dim);letter-spacing:.12em;margin-bottom:6px}
+.insight-val{font-family:var(–display);font-size:26px;letter-spacing:.05em}
+.insight-delta{font-size:10px;margin-top:2px}
+.delta-up{color:var(–green)}
+.delta-down{color:var(–red)}
+.phase-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:9px;letter-spacing:.08em;font-weight:600;margin-bottom:8px}
+
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(–bg)}
+::-webkit-scrollbar-thumb{background:var(–bdr2);border-radius:4px}
+
+#flash{position:fixed;inset:0;pointer-events:none;z-index:999;background:rgba(167,139,250,.15);opacity:0;transition:opacity .1s}
+</style>
+
+</head>
+<body>
+
+<div id="home" class="screen active"><div id="homeContent"></div></div>
+
+<div id="practice" class="screen">
+  <div class="practice-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <span id="practiceTitle" style="font-weight:600;font-size:13px"></span>
+    <!-- GooglEii TOGGLE -->
+    <button class="googly-btn" id="googlyBtn" onclick="toggleGooglyEyes()" title="GooglEii Privacy Mode">
+      <span class="eye-icon">🥽</span>
+      <span class="googl-logo">
+        <span class="gl">G</span><span class="go1">o</span><span class="go2">o</span><span class="gg">g</span><span class="gl2">l</span><span class="gE">E</span><span class="gi1">i</span><span class="gi2">i</span>
+      </span>
+      <span class="googly-status" id="googlyStatus">OFF</span>
+    </button>
+    <div id="sessionTimer" style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim)"></div>
+  </div>
+  <div class="practice-body">
+    <div class="cam-side">
+      <video id="userVideo" autoplay playsinline muted></video>
+      <canvas id="poseCanvas" width="480" height="480"></canvas>
+      <div id="camOverlay" class="cam-overlay">
+        <div class="loading-ring"></div>
+        <p style="margin-top:12px;font-size:11px;color:var(--dim);letter-spacing:.08em">LOADING POSE ENGINE</p>
+      </div>
+      <div id="countdownOverlay" class="cam-overlay" style="display:none;background:rgba(5,5,10,.7)">
+        <div id="countdownNum" class="countdown-num" style="color:var(--purpleL)">3</div>
+        <div style="font-size:13px;margin-top:8px;color:var(--txt)">Get ready!</div>
+      </div>
+      <div id="liveScoreBadge" class="live-score-badge" style="display:none">
+        <div class="lsb-val" id="liveScoreVal" style="color:var(--green)">--</div>
+        <div class="lsb-lbl">MATCH SCORE</div>
+      </div>
+      <div class="cam-label">YOUR CAMERA</div>
+      <div class="sim-badge" id="simBadge" style="display:none">⚠ SIM MODE</div>
+      <div class="privacy-badge" id="privacyBadge">🥽 GooglEii ON</div>
+    </div>
+    <div class="target-side">
+      <div class="target-label" id="targetLabelEl" style="color:var(--purpleL)">TARGET POSE</div>
+      <div class="target-name" id="targetPoseNameEl">—</div>
+      <svg id="targetSVG" viewBox="0 0 180 240" width="160" height="220"></svg>
+      <div class="pose-dots" id="poseDots"></div>
+      <div style="margin-top:8px;font-size:9px;color:var(--dim);letter-spacing:.1em" id="instructorPREl"></div>
+    </div>
+  </div>
+  <div class="beat-bar">
+    <div class="beat-pulse" id="beatPulse"></div>
+    <div class="beat-timeline" id="beatTimeline"></div>
+    <div style="font-size:8px;color:var(--dim);letter-spacing:.1em" id="bpmDisplay">— BPM</div>
+  </div>
+  <div class="done-panel" id="donePanel">
+    <div class="done-trophy" id="doneTrophy">🏆</div>
+    <div class="done-title" id="doneTitle">SESSION COMPLETE</div>
+    <div class="score-row">
+      <div class="score-box"><div class="score-box-val" id="doneAvg" style="color:var(--purpleL)">--</div><div class="score-box-lbl">AVG SCORE</div></div>
+      <div class="score-box"><div class="score-box-val" id="donePeak" style="color:var(--green)">--</div><div class="score-box-lbl">PEAK SCORE</div></div>
+      <div class="score-box"><div class="score-box-val" id="doneBeat" style="color:var(--amber)">--</div><div class="score-box-lbl">BEAT SYNC %</div></div>
+    </div>
+    <div class="done-btns">
+      <button class="btn-primary" onclick="openRemix()">🎛 REMIX REPLAY</button>
+      <button class="btn-secondary" onclick="restartSession()">Try Again</button>
+      <button class="btn-secondary" onclick="saveAndGoHome()">Save & Home</button>
+    </div>
+  </div>
+</div>
+
+<div id="remix" class="screen">
+  <div class="remix-header">
+    <button class="back-btn" onclick="showScreen('practice');document.getElementById('donePanel').classList.add('visible')" style="margin-bottom:8px">← Back</button>
+    <div class="remix-title">POP & LOCK REMIX</div>
+    <div class="remix-sub">YOUR REPLAY · BEAT-SYNC ANALYSIS · 100% TEMPLATE GHOST</div>
+  </div>
+  <div class="remix-controls">
+    <div class="bpm-control">
+      <span class="bpm-lbl">BPM</span>
+      <button class="bpm-btn" onclick="adjustBPM(-5)">−</button>
+      <span class="bpm-val" id="bpmVal">120</span>
+      <button class="bpm-btn" onclick="adjustBPM(5)">+</button>
+    </div>
+    <button class="btn-primary" id="playRemixBtn" onclick="toggleRemixPlay()" style="padding:8px 20px">▶ PLAY REMIX</button>
+    <div style="font-size:9px;color:var(--dim);letter-spacing:.08em" id="remixRoutineLabel"></div>
+  </div>
+  <div class="remix-stage">
+    <div class="remix-panel">
+      <div class="remix-panel-title" style="color:var(--green)">YOUR PERFORMANCE</div>
+      <svg id="remixUserSVG" viewBox="0 0 160 220" width="140" height="190"></svg>
+      <div style="font-size:10px;color:var(--dim);margin-top:6px" id="remixUserScore"></div>
+    </div>
+    <div class="remix-panel">
+      <div class="remix-panel-title" style="color:var(--purpleL)">100% TEMPLATE GHOST</div>
+      <svg id="remixTemplateSVG" viewBox="0 0 160 220" width="140" height="190"></svg>
+      <div style="font-size:10px;color:var(--purpleL);margin-top:6px" id="remixTemplateScore">PERFECT</div>
+    </div>
+  </div>
+  <div class="sync-timeline">
+    <div class="sync-title">BEAT SYNC MAP — Each column = 1 beat. Green = on-beat. Red = missed.</div>
+    <div class="beat-map" id="beatMap"></div>
+  </div>
+  <div class="sync-score-bar">
+    <div class="sync-title">SESSION SYNC BREAKDOWN</div>
+    <div class="sync-score-row" id="syncScoreRow"></div>
+  </div>
+  <div class="what-if-panel">
+    <div class="what-if-title">WHAT IF YOU WERE FULLY IN SYNC?</div>
+    <div style="font-size:10px;color:var(--dim);margin-bottom:10px;line-height:1.6" id="whatIfText"></div>
+    <canvas class="what-if-canvas" id="whatIfCanvas" height="80"></canvas>
+  </div>
+</div>
+
+<div id="dashboard" class="screen">
+  <div class="db-header">
+    <div class="db-title">INTELLIGENCE DASHBOARD</div>
+    <div class="db-sub">ANAGAGE · MULTI-YEAR ANALYSIS · MAY 2023 – MARCH 2026</div>
+  </div>
+  <div class="tab-row">
+    <button class="db-tab active" onclick="showDbPanel('arc',this)">Conversation Arc</button>
+    <button class="db-tab" onclick="showDbPanel('stress',this)">Emotional Temp</button>
+    <button class="db-tab" onclick="showDbPanel('movement',this)">Movement PRs</button>
+    <button class="db-tab" onclick="showDbPanel('wecoin',this)">WeCoin Model</button>
+    <button class="db-tab" onclick="showDbPanel('beatiq',this)">Beat IQ</button>
+  </div>
+  <div class="db-panel active" id="panel-arc">
+    <div class="insights-grid">
+      <div class="insight-card"><div class="insight-label">LEGAL DOMINANCE (MAR 26)</div><div class="insight-val" style="color:var(--blue)">51%</div><div class="insight-delta delta-up">↑ from &lt;2% in May '23</div></div>
+      <div class="insight-card"><div class="insight-label">CREATIVE FLOOR</div><div class="insight-val" style="color:var(--red)">11%</div><div class="insight-delta delta-down">↓ from 28% peak (May '23)</div></div>
+      <div class="insight-card"><div class="insight-label">MONTHS TRACKED</div><div class="insight-val" style="color:var(--purpleL)">35</div><div class="insight-delta" style="color:var(--dim)">May 2023 → Mar 2026</div></div>
+      <div class="insight-card"><div class="insight-label">SHIFT ONSET</div><div class="insight-val" style="color:var(--amber)">Jan '24</div><div class="insight-delta" style="color:var(--dim)">Legal began climbing</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">CONVERSATION CATEGORY DISTRIBUTION BY MONTH</div>
+      <div class="chart-card-sub">Stacked % share of user-initiated turns. Legal (blue) grows from &lt;2% → 50-65% and never retreats.</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="arcChart"></canvas></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px;font-size:9px;color:var(--dim)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:#378ADD;border-radius:2px"></span>Legal</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:#D85A30;border-radius:2px"></span>Creative</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:#7F77DD;border-radius:2px"></span>Personal</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:#1D9E75;border-radius:2px"></span>Intellectual</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:#BA7517;border-radius:2px"></span>Professional</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:#888780;border-radius:2px"></span>Sport/play</span>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">THREE PHASES</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:11px;line-height:1.7">
+        <div><span class="phase-badge" style="background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.3)">PHASE 1 · PRE-FIGHT</span><br><span style="color:var(--dim)">May '23–Dec '23.</span> Net calm. Legal &lt;6%. Creative at 28% peak.</div>
+        <div><span class="phase-badge" style="background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.3)">PHASE 2 · ONSET</span><br><span style="color:var(--dim)">Jan '24–Jan '25.</span> Legal reaches 30-41%. Stress climbs.</div>
+        <div><span class="phase-badge" style="background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3)">PHASE 3 · ACTIVE WAR</span><br><span style="color:var(--dim)">Feb '25–present.</span> Legal 50-65%. Sport/play holds — the resilience signal.</div>
+      </div>
+    </div>
+  </div>
+  <div class="db-panel" id="panel-stress">
+    <div class="insights-grid">
+      <div class="insight-card"><div class="insight-label">WORST MONTH</div><div class="insight-val" style="color:var(--red)">−14</div><div class="insight-delta delta-down">Feb '25 and Nov '25</div></div>
+      <div class="insight-card"><div class="insight-label">BEST CALM MONTH</div><div class="insight-val" style="color:var(--green)">+6</div><div class="insight-delta delta-up">Oct '23</div></div>
+      <div class="insight-card"><div class="insight-label">MONTHS NET NEGATIVE</div><div class="insight-val" style="color:var(--amber)">21</div><div class="insight-delta" style="color:var(--dim)">of 35 tracked</div></div>
+      <div class="insight-card"><div class="insight-label">CREATIVE RESILIENCE</div><div class="insight-val" style="color:var(--purpleL)">HOLDS</div><div class="insight-delta" style="color:var(--dim)">Never drops to zero</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">EMOTIONAL TEMPERATURE</div>
+      <div class="chart-card-sub">Net score = calm − stress. Below zero = net stressed month.</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="stressChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">AVERAGE TURN LENGTH — COMPLEXITY SIGNAL</div>
+      <div class="chart-wrap" style="height:160px"><canvas id="lengthChart"></canvas></div>
+    </div>
+  </div>
+  <div class="db-panel" id="panel-movement">
+    <div class="insights-grid">
+      <div class="insight-card"><div class="insight-label">SPORT / MOVEMENT SIGNAL</div><div class="insight-val" style="color:var(--green)">4–11%</div><div class="insight-delta delta-up">Persistent across all phases</div></div>
+      <div class="insight-card"><div class="insight-label">SESSIONS COMPLETED</div><div class="insight-val" id="mvSessions" style="color:var(--purpleL)">0</div><div class="insight-delta" style="color:var(--dim)">This session</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">SPORT / MOVEMENT MONTHLY SIGNAL</div>
+      <div class="chart-wrap" style="height:160px"><canvas id="sportChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">YOUR PRACTICE SESSIONS</div>
+      <div id="sessionLog" style="font-size:11px;color:var(--dim);padding:8px 0">No sessions yet.</div>
+    </div>
+  </div>
+  <div class="db-panel" id="panel-wecoin">
+    <div class="insights-grid">
+      <div class="insight-card"><div class="insight-label">TOTAL SUPPLY</div><div class="insight-val" style="color:var(--amber)">51T</div><div class="insight-delta" style="color:var(--dim)">WeCoin (WEC)</div></div>
+      <div class="insight-card"><div class="insight-label">DAILY GLOBAL CAP</div><div class="insight-val" style="color:var(--green)">2.79B</div><div class="insight-delta" style="color:var(--dim)">51T × 2% ÷ 365</div></div>
+      <div class="insight-card"><div class="insight-label">GHA PER HUMAN</div><div class="insight-val" style="color:var(--purpleL)">4,000</div><div class="insight-delta" style="color:var(--dim)">Global Human Allocation</div></div>
+      <div class="insight-card"><div class="insight-label">MAX USER DAY REWARD</div><div class="insight-val" style="color:var(--blue)">102K</div><div class="insight-delta" style="color:var(--dim)">10×10×2^10 WEC</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">USER GROWTH PROJECTION (300 DAYS)</div>
+      <div class="chart-wrap" style="height:180px"><canvas id="wecoinGrowthChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">REWARD FORMULA · PRs × EAs × 2^EAs</div>
+      <div class="chart-wrap" style="height:160px"><canvas id="rewardFormulaChart"></canvas></div>
+    </div>
+  </div>
+  <div class="db-panel" id="panel-beatiq">
+    <div class="insights-grid">
+      <div class="insight-card"><div class="insight-label">BEST BEAT SYNC %</div><div class="insight-val" id="bestBeatIQ" style="color:var(--purpleL)">—</div><div class="insight-delta" style="color:var(--dim)">This session</div></div>
+      <div class="insight-card"><div class="insight-label">SESSIONS COMPLETED</div><div class="insight-val" id="sessionsCompleted" style="color:var(--green)">0</div><div class="insight-delta" style="color:var(--dim)">This session</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">BEAT IQ OVER TIME</div>
+      <div class="chart-wrap" style="height:160px"><canvas id="beatIQChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div id="nav">
+  <button class="nav-btn active" id="navHome" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
+  </button>
+  <button class="nav-btn" id="navPractice" onclick="showScreen('practice')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Practice
+  </button>
+  <button class="nav-btn" id="navRemix" onclick="showScreen('remix')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Remix
+  </button>
+  <button class="nav-btn" id="navDash" onclick="showScreen('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+  </button>
+</div>
+<div id="flash"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const ROUTINES=[
+  {id:"r1",title:"Morning Flow",cat:"Yoga",emoji:"🌅",color:"#10b981",bpm:80,instPR:91,diff:"Beginner",dur:"3 min",desc:"Gentle full-body wake-up. Sun salutation + hip openers.",
+   poses:[{n:"Mountain",p:"stand_tall",d:2000},{n:"Arms Up",p:"arms_up",d:1500},{n:"Forward Fold",p:"forward_fold",d:2000},{n:"Warrior I",p:"warrior",d:2000},{n:"Rest",p:"stand_tall",d:1500}]},
+  {id:"r2",title:"Hoop Dreams",cat:"Basketball",emoji:"🏀",color:"#f59e0b",bpm:100,instPR:87,diff:"Intermediate",dur:"5 min",desc:"Ball-handling fundamentals: crossover, between-legs, spin move.",
+   poses:[{n:"Ready",p:"athletic_stance",d:1500},{n:"Crossover L",p:"crossover_l",d:1500},{n:"Crossover R",p:"crossover_r",d:1500},{n:"Behind Back",p:"behind_back",d:2000},{n:"Finish",p:"arms_up",d:1500}]},
+  {id:"r3",title:"Hip Hop Basics",cat:"Dance",emoji:"🎵",color:"#7c3aed",bpm:95,instPR:93,diff:"Beginner",dur:"4 min",desc:"8-count foundational hip hop. Groove, isolations, footwork.",
+   poses:[{n:"Bounce",p:"athletic_stance",d:1200},{n:"Step L",p:"crossover_l",d:800},{n:"Step R",p:"crossover_r",d:800},{n:"Body Roll",p:"forward_fold",d:1500},{n:"Arms",p:"arms_out",d:1500}]},
+  {id:"r4",title:"HIIT Circuit",cat:"Fitness",emoji:"🔥",color:"#ef4444",bpm:130,instPR:78,diff:"Advanced",dur:"6 min",desc:"Jump squat → burpee → mountain climber → high knee.",
+   poses:[{n:"Squat",p:"squat",d:1000},{n:"Jump",p:"arms_up",d:800},{n:"Crouch",p:"forward_fold",d:800},{n:"High Knee",p:"high_knee",d:1000},{n:"Reset",p:"athletic_stance",d:1200}]},
+  {id:"r5",title:"Salsa Footwork",cat:"Dance",emoji:"💃",color:"#ec4899",bpm:105,instPR:89,diff:"Intermediate",dur:"5 min",desc:"Cuban motion + basic step + cross body lead.",
+   poses:[{n:"Basic L",p:"crossover_l",d:1000},{n:"Basic R",p:"crossover_r",d:1000},{n:"Spin Prep",p:"arms_out",d:800},{n:"Spin",p:"arms_up",d:1000},{n:"Finish",p:"athletic_stance",d:1200}]},
+];
+
+const POSES={
+  stand_tall:    {nose:[.5,.13],lSh:[.41,.28],rSh:[.59,.28],lEl:[.37,.41],rEl:[.63,.41],lWr:[.35,.54],rWr:[.65,.54],lHi:[.43,.53],rHi:[.57,.53],lKn:[.42,.69],rKn:[.58,.69],lAn:[.41,.85],rAn:[.59,.85]},
+  arms_up:       {nose:[.5,.13],lSh:[.41,.28],rSh:[.59,.28],lEl:[.30,.16],rEl:[.70,.16],lWr:[.23,.06],rWr:[.77,.06],lHi:[.43,.53],rHi:[.57,.53],lKn:[.42,.69],rKn:[.58,.69],lAn:[.41,.85],rAn:[.59,.85]},
+  arms_out:      {nose:[.5,.13],lSh:[.41,.28],rSh:[.59,.28],lEl:[.24,.28],rEl:[.76,.28],lWr:[.14,.30],rWr:[.86,.30],lHi:[.43,.53],rHi:[.57,.53],lKn:[.42,.69],rKn:[.58,.69],lAn:[.41,.85],rAn:[.59,.85]},
+  forward_fold:  {nose:[.5,.43],lSh:[.43,.36],rSh:[.57,.36],lEl:[.39,.53],rEl:[.61,.53],lWr:[.39,.63],rWr:[.61,.63],lHi:[.43,.43],rHi:[.57,.43],lKn:[.42,.63],rKn:[.58,.63],lAn:[.41,.85],rAn:[.59,.85]},
+  warrior:       {nose:[.5,.18],lSh:[.35,.31],rSh:[.56,.31],lEl:[.20,.31],rEl:[.72,.31],lWr:[.08,.31],rWr:[.84,.31],lHi:[.41,.53],rHi:[.59,.53],lKn:[.33,.71],rKn:[.62,.63],lAn:[.24,.85],rAn:[.67,.81]},
+  athletic_stance:{nose:[.5,.14],lSh:[.42,.29],rSh:[.58,.29],lEl:[.37,.43],rEl:[.63,.43],lWr:[.35,.55],rWr:[.65,.55],lHi:[.44,.54],rHi:[.56,.54],lKn:[.41,.68],rKn:[.59,.68],lAn:[.39,.85],rAn:[.61,.85]},
+  crossover_l:   {nose:[.5,.14],lSh:[.42,.29],rSh:[.58,.29],lEl:[.33,.38],rEl:[.65,.45],lWr:[.27,.30],rWr:[.69,.57],lHi:[.44,.54],rHi:[.56,.54],lKn:[.37,.67],rKn:[.61,.70],lAn:[.35,.85],rAn:[.63,.87]},
+  crossover_r:   {nose:[.5,.14],lSh:[.42,.29],rSh:[.58,.29],lEl:[.35,.45],rEl:[.67,.38],lWr:[.31,.57],rWr:[.73,.30],lHi:[.44,.54],rHi:[.56,.54],lKn:[.39,.70],rKn:[.63,.67],lAn:[.37,.87],rAn:[.65,.85]},
+  behind_back:   {nose:[.5,.14],lSh:[.42,.29],rSh:[.58,.29],lEl:[.35,.41],rEl:[.69,.35],lWr:[.31,.53],rWr:[.75,.45],lHi:[.44,.54],rHi:[.56,.54],lKn:[.41,.68],rKn:[.59,.68],lAn:[.40,.85],rAn:[.60,.85]},
+  squat:         {nose:[.5,.29],lSh:[.42,.39],rSh:[.58,.39],lEl:[.35,.49],rEl:[.65,.49],lWr:[.33,.59],rWr:[.67,.59],lHi:[.43,.61],rHi:[.57,.61],lKn:[.37,.75],rKn:[.63,.75],lAn:[.35,.87],rAn:[.65,.87]},
+  high_knee:     {nose:[.5,.14],lSh:[.42,.29],rSh:[.58,.29],lEl:[.35,.41],rEl:[.63,.37],lWr:[.33,.53],rWr:[.67,.43],lHi:[.44,.54],rHi:[.56,.54],lKn:[.46,.43],rKn:[.59,.68],lAn:[.44,.57],rAn:[.61,.85]},
+};
+
+const MP_MAP={lSh:11,rSh:12,lEl:13,rEl:14,lWr:15,rWr:16,lHi:23,rHi:24,lKn:25,rKn:26,lAn:27,rAn:28};
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let currentRoutine=null,sessionMode='idle',sessionScores=[],beatHits=[],recordedPoses=[];
+let sessionStart=null,poseIdx=0,countdownTimer=null,sessionInterval=null;
+let bpm=120,beatInterval=null,beatCount=0;
+let remixPlaying=false,remixInterval=null,remixPhase=0;
+let userPRs={},beatIQHistory=[],sessionsCount=0,lastSessionData=null;
+let poseDetector=null,cameraInstance=null,simMode=false,simPhase=0;
+let currentLandmarks=null;
+
+// ── GOOGLY EYES STATE ──
+let googlyEyesEnabled = false;
+// Pupil offset state for googly physics
+let lPupilVx=0,lPupilVy=0,lPupilOx=0,lPupilOy=0;
+let rPupilVx=0,rPupilVy=0,rPupilOx=0,rPupilOy=0;
+let lastHeadX=null,lastHeadY=null,lastHeadT=0;
+let headVx=0,headVy=0;
+
+// ═══════════════════════════════════════
+// GOOGLY EYES TOGGLE
+// ═══════════════════════════════════════
+function toggleGooglyEyes() {
+  googlyEyesEnabled = !googlyEyesEnabled;
+  const btn = document.getElementById('googlyBtn');
+  const status = document.getElementById('googlyStatus');
+  const badge = document.getElementById('privacyBadge');
+  btn.classList.toggle('active', googlyEyesEnabled);
+  status.textContent = googlyEyesEnabled ? 'ON' : 'OFF';
+  badge.classList.toggle('visible', googlyEyesEnabled);
+}
+
+// ═══════════════════════════════════════
+// GOOGLY EYES RENDERER
+// ═══════════════════════════════════════
+function drawGooglyEyesOnCanvas(ctx, landmarks, W, H) {
+  // MediaPipe Pose face landmarks (already mirrored in canvas transform):
+  // 0=nose, 2=left eye, 5=right eye, 7=left ear, 8=right ear
+  const nose = landmarks[0];
+  const lEyeLM = landmarks[2];
+  const rEyeLM = landmarks[5];
+  const lEar  = landmarks[7];
+  const rEar  = landmarks[8];
+  if (!lEyeLM || !rEyeLM || !nose) return;
+
+  // Mirror X for our flipped canvas
+  const lx = (1 - lEyeLM.x) * W;
+  const ly = lEyeLM.y * H;
+  const rx = (1 - rEyeLM.x) * W;
+  const ry = rEyeLM.y * H;
+  const nx = (1 - nose.x) * W;
+  const ny = nose.y * H;
+
+  // Ear positions for face width
+  const lEx = lEar ? (1 - lEar.x) * W : lx - 40;
+  const rEx = rEar ? (1 - rEar.x) * W : rx + 40;
+
+  const eyeDist = Math.sqrt((rx-lx)**2 + (ry-ly)**2);
+  const faceW   = Math.abs(rEx - lEx);
+  const eyeR    = Math.max(18, eyeDist * 0.52); // lens radius
+  const pupilR  = eyeR * 0.38;
+  const maxOff  = eyeR * 0.42;
+
+  // ── PIXELATE FACE REGION for identity obscuring ──
+  const faceTop    = Math.max(0, Math.min(ly, ry) - eyeR * 1.8);
+  const faceBottom = Math.min(H, Math.max(ny, Math.max(ly,ry)) + eyeR * 1.6);
+  const faceLeft   = Math.max(0, Math.min(lx, rx) - eyeR * 1.4);
+  const faceRight  = Math.min(W, Math.max(lx, rx) + eyeR * 1.4);
+  const fw = faceRight - faceLeft;
+  const fh = faceBottom - faceTop;
+  if (fw > 4 && fh > 4) {
+    const blockSize = Math.max(8, Math.round(eyeR * 0.35));
+    const imgData = ctx.getImageData(faceLeft, faceTop, fw, fh);
+    const d = imgData.data;
+    for (let bx = 0; bx < fw; bx += blockSize) {
+      for (let by = 0; by < fh; by += blockSize) {
+        let r=0,g=0,b=0,cnt=0;
+        for (let px=bx;px<Math.min(bx+blockSize,fw);px++) {
+          for (let py=by;py<Math.min(by+blockSize,fh);py++) {
+            const idx=(py*fw+px)*4;
+            r+=d[idx];g+=d[idx+1];b+=d[idx+2];cnt++;
+          }
+        }
+        r=Math.round(r/cnt);g=Math.round(g/cnt);b=Math.round(b/cnt);
+        for (let px=bx;px<Math.min(bx+blockSize,fw);px++) {
+          for (let py=by;py<Math.min(by+blockSize,fh);py++) {
+            const idx=(py*fw+px)*4;
+            d[idx]=r;d[idx+1]=g;d[idx+2]=b;
+          }
+        }
+      }
+    }
+    ctx.putImageData(imgData, faceLeft, faceTop);
+  }
+
+  // ── PHYSICS: head velocity drives pupil inertia ──
+  const now = Date.now();
+  const dt = Math.min((now - lastHeadT) / 1000, 0.1);
+  lastHeadT = now;
+  if (lastHeadX !== null) {
+    headVx = (nx - lastHeadX) / Math.max(dt, 0.01);
+    headVy = (ny - lastHeadY) / Math.max(dt, 0.01);
+  }
+  lastHeadX = nx; lastHeadY = ny;
+
+  // Pupils lag behind head movement (inertia) + gravity pull
+  const gravity = 2.5;
+  const friction = 0.82;
+  const springK  = 0.18;
+
+  function updatePupil(ox, oy, vx, vy) {
+    // Spring back to center
+    vx += -springK * ox - headVx * 0.008;
+    vy += -springK * oy - headVy * 0.008 + gravity * dt * 6;
+    vx *= friction; vy *= friction;
+    ox += vx * dt * 60; oy += vy * dt * 60;
+    // Clamp inside lens
+    const dist = Math.sqrt(ox*ox + oy*oy);
+    const maxD = maxOff;
+    if (dist > maxD) { ox = ox/dist*maxD; oy = oy/dist*maxD; vx*=0.3; vy*=0.3; }
+    return [ox, oy, vx, vy];
+  }
+  [lPupilOx,lPupilOy,lPupilVx,lPupilVy] = updatePupil(lPupilOx,lPupilOy,lPupilVx,lPupilVy);
+  [rPupilOx,rPupilOy,rPupilVx,rPupilVy] = updatePupil(rPupilOx,rPupilOy,rPupilVx,rPupilVy);
+
+  const lPx = lx + lPupilOx, lPy = ly + lPupilOy;
+  const rPx = rx + rPupilOx, rPy = ry + rPupilOy;
+
+  // ── DRAW GLASSES FRAME ──
+  ctx.save();
+
+  // Frame outline / shadow
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 8;
+
+  // Left lens white
+  ctx.beginPath();
+  ctx.arc(lx, ly, eyeR, 0, Math.PI*2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = Math.max(3, eyeR * 0.12);
+  ctx.stroke();
+
+  // Right lens white
+  ctx.beginPath();
+  ctx.arc(rx, ry, eyeR, 0, Math.PI*2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+
+  // Bridge between lenses
+  const bridgeY = (ly + ry) / 2;
+  const lBridgeX = lx + eyeR * 0.75;
+  const rBridgeX = rx - eyeR * 0.75;
+  ctx.beginPath();
+  ctx.moveTo(lBridgeX, ly);
+  ctx.bezierCurveTo(lBridgeX + (rBridgeX - lBridgeX)*0.25, ly - eyeR*0.25,
+                    rBridgeX - (rBridgeX - lBridgeX)*0.25, ry - eyeR*0.25,
+                    rBridgeX, ry);
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = Math.max(3, eyeR * 0.1);
+  ctx.stroke();
+
+  // Temple arms (out to sides)
+  ctx.beginPath();
+  ctx.moveTo(lx - eyeR, ly);
+  ctx.lineTo(lx - eyeR * 1.9, ly - eyeR * 0.15);
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = Math.max(3, eyeR * 0.1);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(rx + eyeR, ry);
+  ctx.lineTo(rx + eyeR * 1.9, ry - eyeR * 0.15);
+  ctx.stroke();
+
+  // ── PUPILS ──
+  // Left pupil
+  ctx.beginPath();
+  ctx.arc(lPx, lPy, pupilR, 0, Math.PI*2);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+  // Pupil highlight
+  ctx.beginPath();
+  ctx.arc(lPx - pupilR*0.28, lPy - pupilR*0.28, pupilR*0.28, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.fill();
+
+  // Right pupil
+  ctx.beginPath();
+  ctx.arc(rPx, rPy, pupilR, 0, Math.PI*2);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(rPx - pupilR*0.28, rPy - pupilR*0.28, pupilR*0.28, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.fill();
+
+  // ── EYELASHES (fun detail) ──
+  function drawLashes(cx, cy, radius, count=6) {
+    for (let i=0;i<count;i++) {
+      const angle = (i/count)*Math.PI*2;
+      const x1 = cx + Math.cos(angle)*radius;
+      const y1 = cy + Math.sin(angle)*radius;
+      const x2 = cx + Math.cos(angle)*(radius+eyeR*0.18);
+      const y2 = cy + Math.sin(angle)*(radius+eyeR*0.18);
+      ctx.beginPath();
+      ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+      ctx.strokeStyle='#222';
+      ctx.lineWidth=Math.max(1.5,eyeR*0.05);
+      ctx.stroke();
+    }
+  }
+  drawLashes(lx, ly, eyeR);
+  drawLashes(rx, ry, eyeR);
+
+  ctx.restore();
+}
+
+// Sim mode googly: estimate face position from canvas center + movement
+function drawSimGooglyEyes(ctx, W, H, simPh) {
+  // Simulate head position with gentle movement
+  const cx = W * 0.5 + Math.sin(simPh * 0.7) * W * 0.04;
+  const cy = H * 0.28 + Math.cos(simPh * 0.5) * H * 0.03;
+  const eyeSep = W * 0.09;
+  const lx = cx - eyeSep, rx = cx + eyeSep;
+  const ly = cy, ry = cy;
+
+  // Use same physics update
+  const now = Date.now();
+  const dt = Math.min((now - lastHeadT)/1000, 0.1);
+  lastHeadT = now;
+  headVx = Math.cos(simPh) * 20;
+  headVy = Math.sin(simPh * 0.8) * 15;
+
+  const eyeR = eyeSep * 0.9;
+  const pupilR = eyeR * 0.38;
+  const maxOff = eyeR * 0.42;
+  const friction=0.82, springK=0.18, gravity=2.5;
+  function updatePupil(ox,oy,vx,vy) {
+    vx += -springK*ox - headVx*0.008;
+    vy += -springK*oy - headVy*0.008 + gravity*dt*6;
+    vx*=friction; vy*=friction;
+    ox+=vx*dt*60; oy+=vy*dt*60;
+    const dist=Math.sqrt(ox*ox+oy*oy);
+    if(dist>maxOff){ox=ox/dist*maxOff;oy=oy/dist*maxOff;vx*=0.3;vy*=0.3;}
+    return [ox,oy,vx,vy];
+  }
+  [lPupilOx,lPupilOy,lPupilVx,lPupilVy]=updatePupil(lPupilOx,lPupilOy,lPupilVx,lPupilVy);
+  [rPupilOx,rPupilOy,rPupilVx,rPupilVy]=updatePupil(rPupilOx,rPupilOy,rPupilVx,rPupilVy);
+
+  // Draw pixelate region
+  const faceLeft=Math.max(0,cx-eyeR*2.2), faceTop=Math.max(0,cy-eyeR*2);
+  const fw=Math.min(W,cx+eyeR*2.2)-faceLeft, fh=Math.min(H,cy+eyeR*2)-faceTop;
+  if(fw>4&&fh>4){
+    const bs=Math.max(8,Math.round(eyeR*0.35));
+    const imgD=ctx.getImageData(faceLeft,faceTop,fw,fh);
+    const d=imgD.data;
+    for(let bx=0;bx<fw;bx+=bs){for(let by=0;by<fh;by+=bs){
+      let r=0,g=0,b=0,cnt=0;
+      for(let px=bx;px<Math.min(bx+bs,fw);px++){for(let py=by;py<Math.min(by+bs,fh);py++){
+        const i=(py*fw+px)*4; r+=d[i];g+=d[i+1];b+=d[i+2];cnt++;
+      }}
+      r=Math.round(r/cnt);g=Math.round(g/cnt);b=Math.round(b/cnt);
+      for(let px=bx;px<Math.min(bx+bs,fw);px++){for(let py=by;py<Math.min(by+bs,fh);py++){
+        const i=(py*fw+px)*4; d[i]=r;d[i+1]=g;d[i+2]=b;
+      }}
+    }}
+    ctx.putImageData(imgD,faceLeft,faceTop);
+  }
+
+  ctx.save();
+  // Left lens
+  ctx.beginPath(); ctx.arc(lx,ly,eyeR,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=Math.max(3,eyeR*0.12); ctx.stroke();
+  // Right lens
+  ctx.beginPath(); ctx.arc(rx,ry,eyeR,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill(); ctx.stroke();
+  // Bridge
+  ctx.beginPath(); ctx.moveTo(lx+eyeR*0.75,ly); ctx.lineTo(rx-eyeR*0.75,ry);
+  ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=Math.max(3,eyeR*0.1); ctx.stroke();
+  // Pupils
+  [[lx+lPupilOx,ly+lPupilOy],[rx+rPupilOx,ry+rPupilOy]].forEach(([px,py])=>{
+    ctx.beginPath(); ctx.arc(px,py,pupilR,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
+    ctx.beginPath(); ctx.arc(px-pupilR*.28,py-pupilR*.28,pupilR*.28,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.fill();
+  });
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('nav'+id.charAt(0).toUpperCase()+id.slice(1)).classList.add('active');
+  if(id==='dashboard') initDashboard();
+}
+function goHome(){stopSession();showScreen('home');}
+function openRemix(){document.getElementById('donePanel').classList.remove('visible');showScreen('remix');buildRemix();}
+
+// ═══════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════
+function buildHome(){
+  const el=document.getElementById('homeContent');
+  const avgPR=Object.values(userPRs).length>0?Math.round(Object.values(userPRs).reduce((a,b)=>a+b,0)/Object.values(userPRs).length):null;
+  el.innerHTML=`
+    <div class="home-header">
+      <div class="logo-mark">M</div>
+      <div><div class="home-title">MovePR</div><div class="home-sub">ANAGAGE · POP & LOCK · BEAT SYNC</div></div>
+    </div>
+    <div class="stat-strip">
+      <div class="stat-pill"><div class="stat-val" style="color:var(--purpleL)">${avgPR||'—'}</div><div class="stat-lbl">AVG PR</div></div>
+      <div class="stat-pill"><div class="stat-val" style="color:var(--green)">${sessionsCount}</div><div class="stat-lbl">SESSIONS</div></div>
+      <div class="stat-pill"><div class="stat-val" style="color:var(--amber)">${beatIQHistory.length>0?Math.round(beatIQHistory[beatIQHistory.length-1].score)+'%':'—'}</div><div class="stat-lbl">BEAT IQ</div></div>
+    </div>
+    <div class="routine-grid">
+      ${ROUTINES.map(r=>`
+        <div class="rcard" onclick="selectRoutine('${r.id}')">
+          <div class="rcard-bar" style="background:${r.color}"></div>
+          <div class="rcard-body">
+            <div class="rcard-emoji">${r.emoji}</div>
+            <div class="rcard-title">${r.title}</div>
+            <div class="rcard-cat">${r.cat} · ${r.diff} · ${r.dur}</div>
+            <div style="font-size:9px;color:var(--dim);margin-bottom:8px;line-height:1.4">${r.desc}</div>
+            <div class="rcard-pr" style="border:1px solid ${r.color}20">
+              <span style="color:var(--dim);font-size:9px">INST PR</span>
+              <span class="pr-badge" style="color:${r.color}">${r.instPR}%</span>
+            </div>
+            ${userPRs[r.id]?`<div class="rcard-pr" style="margin-top:4px;border:1px solid var(--bdr)"><span style="color:var(--dim);font-size:9px">YOUR PR</span><span class="pr-badge" style="color:var(--greenL)">${userPRs[r.id]}%</span></div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// STICK FIGURE
+// ═══════════════════════════════════════
+function drawStick(svgEl,poseName,color='#a78bfa',alpha=1,W=160,H=220){
+  const pose=POSES[poseName]||POSES.stand_tall;
+  const pt=k=>({x:(pose[k]?.[0]||.5)*W,y:(pose[k]?.[1]||.5)*H});
+  const segs=[['lSh','rSh'],['lHi','rHi'],['lSh','lHi'],['rSh','rHi'],['lSh','lEl'],['lEl','lWr'],['rSh','rEl'],['rEl','rWr'],['lHi','lKn'],['lKn','lAn'],['rHi','rKn'],['rKn','rAn'],['lSh','rHi'],['rSh','lHi']];
+  const joints=['lSh','rSh','lEl','rEl','lHi','rHi','lKn','rKn','lAn','rAn'];
+  const nose=pt('nose');
+  const lines=segs.map(([a,b])=>{const pa=pt(a),pb=pt(b);return`<line x1="${pa.x.toFixed(1)}" y1="${pa.y.toFixed(1)}" x2="${pb.x.toFixed(1)}" y2="${pb.y.toFixed(1)}" stroke="${color}" stroke-width="2.5" stroke-linecap="round" opacity="${alpha}"/>`;}).join('');
+  const dots=joints.map(k=>{const p=pt(k);return`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${color}" opacity="${alpha}"/>`;}).join('');
+  const head=`<circle cx="${nose.x.toFixed(1)}" cy="${(nose.y-13).toFixed(1)}" r="12" fill="none" stroke="${color}" stroke-width="2" opacity="${alpha}"/>`;
+  svgEl.innerHTML=lines+dots+head;
+}
+
+function drawStickInterp(svgEl,poseName,targetPoseName,t,color='#a78bfa',alpha=1,W=160,H=220){
+  const src=POSES[poseName]||POSES.stand_tall,tgt=POSES[targetPoseName]||POSES.stand_tall;
+  const lerp=(a,b)=>a+(b-a)*t;
+  const pt=k=>({x:lerp(src[k]?.[0]||.5,tgt[k]?.[0]||.5)*W,y:lerp(src[k]?.[1]||.5,tgt[k]?.[1]||.5)*H});
+  const segs=[['lSh','rSh'],['lHi','rHi'],['lSh','lHi'],['rSh','rHi'],['lSh','lEl'],['lEl','lWr'],['rSh','rEl'],['rEl','rWr'],['lHi','lKn'],['lKn','lAn'],['rHi','rKn'],['rKn','rAn']];
+  const joints=['lSh','rSh','lEl','rEl','lHi','rHi','lKn','rKn','lAn','rAn'];
+  const nosePt=pt('nose');
+  const lines=segs.map(([a,b])=>{const pa=pt(a),pb=pt(b);return`<line x1="${pa.x.toFixed(1)}" y1="${pa.y.toFixed(1)}" x2="${pb.x.toFixed(1)}" y2="${pb.y.toFixed(1)}" stroke="${color}" stroke-width="2.5" stroke-linecap="round" opacity="${alpha}"/>`;}).join('');
+  const dots=joints.map(k=>{const p=pt(k);return`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${color}" opacity="${alpha}"/>`;}).join('');
+  const head=`<circle cx="${nosePt.x.toFixed(1)}" cy="${(nosePt.y-13).toFixed(1)}" r="12" fill="none" stroke="${color}" stroke-width="2" opacity="${alpha}"/>`;
+  svgEl.innerHTML=lines+dots+head;
+}
+
+// ═══════════════════════════════════════
+// POSE SCORE
+// ═══════════════════════════════════════
+function calcScore(landmarks,poseName){
+  if(!landmarks||landmarks.length<29) return null;
+  const target=POSES[poseName]||POSES.stand_tall;
+  let total=0,count=0;
+  Object.keys(MP_MAP).forEach(k=>{
+    const ti=target[k],lm=landmarks[MP_MAP[k]];
+    if(!ti||!lm) return;
+    const dx=ti[0]-(1-lm.x),dy=ti[1]-lm.y;
+    total+=Math.max(0,1-Math.sqrt(dx*dx+dy*dy)*3.5);count++;
+  });
+  return count>0?Math.round((total/count)*100):50;
+}
+
+// ═══════════════════════════════════════
+// MEDIAPIPE
+// ═══════════════════════════════════════
+async function initMediaPipe(){
+  return new Promise(async resolve=>{
+    try{
+      if(typeof window.Pose==='undefined'){resolve(false);return;}
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+      const videoEl=document.getElementById('userVideo');
+      videoEl.srcObject=stream; await videoEl.play();
+      const pose=new window.Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
+      pose.setOptions({modelComplexity:1,smoothLandmarks:true,minDetectionConfidence:0.6,minTrackingConfidence:0.5,enableSegmentation:false});
+      const canvas=document.getElementById('poseCanvas');
+      const ctx=canvas.getContext('2d');
+      pose.onResults(results=>{
+        if(sessionMode!=='active'&&sessionMode!=='countdown') return;
+        const W=canvas.width,H=canvas.height;
+        ctx.save();
+        ctx.clearRect(0,0,W,H);
+        ctx.scale(-1,1); ctx.translate(-W,0);
+        if(results.image) ctx.drawImage(results.image,0,0,W,H);
+        ctx.restore();
+        if(results.poseLandmarks){
+          currentLandmarks=results.poseLandmarks;
+          drawLandmarksOnCanvas(ctx,results.poseLandmarks,W,H);
+          // ── GOOGLY EYES OVERLAY ──
+          if(googlyEyesEnabled) drawGooglyEyesOnCanvas(ctx,results.poseLandmarks,W,H);
+          if(sessionMode==='active'&&currentRoutine){
+            const curPose=currentRoutine.poses[poseIdx];
+            if(curPose){const s=calcScore(results.poseLandmarks,curPose.p);if(s!==null){updateLiveScore(s);sessionScores.push(s);recordedPoses.push({poseIdx,score:s,time:Date.now()-sessionStart});}}
+          }
+        }
+      });
+      poseDetector=pose;
+      const camera=new window.Camera(videoEl,{onFrame:async()=>{if(poseDetector&&(sessionMode==='active'||sessionMode==='countdown')){try{await poseDetector.send({image:videoEl});}catch(e){}}},width:640,height:480});
+      camera.start(); cameraInstance=camera;
+      resolve(true);
+    }catch(e){console.warn('MediaPipe init failed:',e);resolve(false);}
+  });
+}
+
+function drawLandmarksOnCanvas(ctx,lm,W,H){
+  const pt=i=>{const l=lm[i];return l?{x:(1-l.x)*W,y:l.y*H}:null;};
+  const pairs=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+  ctx.strokeStyle='#34d399';ctx.lineWidth=2.5;ctx.lineCap='round';
+  pairs.forEach(([a,b])=>{const pa=pt(a),pb=pt(b);if(!pa||!pb) return;ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.stroke();});
+  [0,11,12,13,14,15,16,23,24,25,26,27,28].forEach(i=>{const p=pt(i);if(!p) return;ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle='#34d399';ctx.fill();});
+}
+
+// ═══════════════════════════════════════
+// SESSION
+// ═══════════════════════════════════════
+function selectRoutine(id){currentRoutine=ROUTINES.find(r=>r.id===id);if(!currentRoutine) return;showScreen('practice');startSession();}
+
+async function startSession(){
+  if(!currentRoutine) return;
+  sessionScores=[];beatHits=[];recordedPoses=[];poseIdx=0;beatCount=0;simPhase=0;
+  sessionMode='loading';
+  document.getElementById('practiceTitle').textContent=currentRoutine.title;
+  document.getElementById('donePanel').classList.remove('visible');
+  document.getElementById('camOverlay').style.display='flex';
+  document.getElementById('countdownOverlay').style.display='none';
+  document.getElementById('liveScoreBadge').style.display='none';
+  document.getElementById('simBadge').style.display='none';
+  document.getElementById('targetLabelEl').style.color=currentRoutine.color;
+  document.getElementById('instructorPREl').textContent=`INSTRUCTOR PR: ${currentRoutine.instPR}%`;
+  const dotsEl=document.getElementById('poseDots');
+  dotsEl.innerHTML=currentRoutine.poses.map((p,i)=>`<div class="pose-dot${i===0?' active':''}" style="width:${i===0?'16px':'5px'}" id="dot${i}"></div>`).join('');
+  updateTargetPose();bpm=currentRoutine.bpm;
+  document.getElementById('bpmDisplay').textContent=`${bpm} BPM`;
+  document.getElementById('bpmVal').textContent=bpm;
+  const gotCamera=await initMediaPipe();simMode=!gotCamera;
+  document.getElementById('camOverlay').style.display='none';
+  if(simMode) document.getElementById('simBadge').style.display='block';
+  startCountdown();
+}
+
+function startCountdown(){
+  sessionMode='countdown';
+  document.getElementById('countdownOverlay').style.display='flex';
+  let c=3;
+  document.getElementById('countdownNum').textContent=c;
+  document.getElementById('countdownNum').style.color=currentRoutine.color;
+  countdownTimer=setInterval(()=>{
+    c--;
+    if(c<=0){clearInterval(countdownTimer);document.getElementById('countdownOverlay').style.display='none';document.getElementById('liveScoreBadge').style.display='block';startActiveSession();}
+    else document.getElementById('countdownNum').textContent=c;
+  },1000);
+}
+
+function startActiveSession(){
+  sessionMode='active';sessionStart=Date.now();startBeat();
+  const poses=currentRoutine.poses;
+  const totalDuration=poses.reduce((s,p)=>s+p.d,0)*2;
+  let elapsed=0;
+  sessionInterval=setInterval(()=>{
+    elapsed+=100;
+    document.getElementById('sessionTimer').textContent=`${Math.floor(elapsed/60000)}:${String(Math.floor((elapsed%60000)/1000)).padStart(2,'0')}`;
+    const loopElapsed=elapsed%poses.reduce((s,p)=>s+p.d,0);
+    let acc=0,newPoseIdx=0;
+    poses.forEach((p,i)=>{acc+=p.d;if(loopElapsed>=acc-p.d&&loopElapsed<acc)newPoseIdx=i;});
+    if(newPoseIdx!==poseIdx){poseIdx=newPoseIdx;updateTargetPose();}
+    if(simMode){
+      simPhase+=0.03;
+      const s=Math.min(99,Math.round(55+Math.sin(simPhase)*22+Math.random()*12));
+      updateLiveScore(s);sessionScores.push(s);recordedPoses.push({poseIdx:newPoseIdx,score:s,time:elapsed});
+      const canvas=document.getElementById('poseCanvas');
+      const ctx=canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle='#02020a';ctx.fillRect(0,0,canvas.width,canvas.height);
+      const simPs=['stand_tall','athletic_stance','crossover_l','crossover_r','arms_up'];
+      drawStickOnCanvas(ctx,simPs[Math.floor(simPhase/2)%simPs.length],canvas.width/2,canvas.height/2,'#34d399',0.85,canvas.width,canvas.height);
+      // ── SIM GOOGLY EYES ──
+      if(googlyEyesEnabled) drawSimGooglyEyes(ctx,canvas.width,canvas.height,simPhase);
+    }
+    if(elapsed>=totalDuration){clearInterval(sessionInterval);endSession();}
+  },100);
+}
+
+function drawStickOnCanvas(ctx,poseName,cx,cy,color,alpha,W,H){
+  const pose=POSES[poseName]||POSES.stand_tall;
+  const scale=Math.min(W,H)*0.85,offsetX=cx-scale*0.5,offsetY=cy-scale*0.45;
+  const pt=k=>({x:offsetX+(pose[k]?.[0]||.5)*scale,y:offsetY+(pose[k]?.[1]||.5)*scale*0.9});
+  const segs=[['lSh','rSh'],['lHi','rHi'],['lSh','lHi'],['rSh','rHi'],['lSh','lEl'],['lEl','lWr'],['rSh','rEl'],['rEl','rWr'],['lHi','lKn'],['lKn','lAn'],['rHi','rKn'],['rKn','rAn']];
+  ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=3;ctx.lineCap='round';
+  segs.forEach(([a,b])=>{const pa=pt(a),pb=pt(b);ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.stroke();});
+  const nose=pt('nose');ctx.beginPath();ctx.arc(nose.x,nose.y-12,14,0,Math.PI*2);ctx.stroke();
+  ctx.globalAlpha=1;
+}
+
+function updateTargetPose(){
+  if(!currentRoutine) return;
+  const pose=currentRoutine.poses[poseIdx];if(!pose) return;
+  document.getElementById('targetPoseNameEl').textContent=pose.n;
+  drawStick(document.getElementById('targetSVG'),pose.p,currentRoutine.color,1,180,240);
+  currentRoutine.poses.forEach((_,i)=>{const dot=document.getElementById(`dot${i}`);if(dot){dot.style.width=i===poseIdx?'16px':'5px';dot.style.background=i===poseIdx?currentRoutine.color:'var(--bdr)';}});
+}
+
+function updateLiveScore(s){const el=document.getElementById('liveScoreVal');el.textContent=s+'%';el.style.color=s>=80?'var(--green)':s>=60?'var(--amber)':'var(--red)';}
+
+function stopSession(){
+  clearInterval(sessionInterval);clearInterval(countdownTimer);stopBeat();sessionMode='idle';
+  if(cameraInstance){try{cameraInstance.stop();}catch(e){} cameraInstance=null;}
+  if(poseDetector){try{poseDetector.close();}catch(e){} poseDetector=null;}
+  const video=document.getElementById('userVideo');
+  if(video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null;}
+}
+
+function endSession(){
+  stopBeat();sessionMode='done';
+  const avg=sessionScores.length>0?Math.round(sessionScores.reduce((a,b)=>a+b,0)/sessionScores.length):0;
+  const peak=sessionScores.length>0?Math.max(...sessionScores):0;
+  const beatSync=beatHits.length>0?Math.round(beatHits.filter(h=>h.onBeat).length/beatHits.length*100):Math.round(50+Math.random()*30);
+  document.getElementById('doneAvg').textContent=avg+'%';
+  document.getElementById('donePeak').textContent=peak+'%';
+  document.getElementById('doneBeat').textContent=beatSync+'%';
+  document.getElementById('doneTitle').textContent=peak>=(currentRoutine.instPR||85)?'NEW PR! 🏆':avg>=70?'GREAT SESSION':'SESSION COMPLETE';
+  document.getElementById('doneTrophy').textContent=peak>=(currentRoutine.instPR||85)?'🏆':avg>=70?'⭐':'💪';
+  if(currentRoutine){const prev=userPRs[currentRoutine.id]||0;userPRs[currentRoutine.id]=Math.max(prev,peak);}
+  beatIQHistory.push({score:beatSync,date:new Date()});sessionsCount++;
+  lastSessionData={routine:currentRoutine,avg,peak,beatSync,scores:[...sessionScores],recordedPoses:[...recordedPoses],bpm};
+  document.getElementById('donePanel').classList.add('visible');flash();
+}
+function restartSession(){document.getElementById('donePanel').classList.remove('visible');stopSession();startSession();}
+function saveAndGoHome(){stopSession();showScreen('home');buildHome();updateDashboardSessionLog();}
+function flash(){const el=document.getElementById('flash');el.style.opacity='1';setTimeout(()=>{el.style.opacity='0';},200);}
+
+// ═══════════════════════════════════════
+// BEAT ENGINE
+// ═══════════════════════════════════════
+function startBeat(){
+  const msPerBeat=60000/bpm;beatCount=0;
+  const timeline=document.getElementById('beatTimeline');timeline.innerHTML='';
+  for(let i=0;i<24;i++){const tick=document.createElement('div');tick.className='beat-tick';tick.style.left=(i/24*100)+'%';tick.id=`btick${i}`;timeline.appendChild(tick);}
+  beatInterval=setInterval(()=>{
+    beatCount++;
+    const pulse=document.getElementById('beatPulse');
+    if(pulse){pulse.style.transform='scale(1.8)';pulse.style.opacity='1';setTimeout(()=>{pulse.style.transform='scale(1)';pulse.style.opacity='.6';},80);}
+    const tickIdx=beatCount%24;const tickEl=document.getElementById(`btick${tickIdx}`);
+    if(tickEl){const hasScore=sessionScores.length>0;const lastScore=sessionScores[sessionScores.length-1]||0;
+      if(hasScore){const onBeat=lastScore>65;tickEl.className=`beat-tick ${onBeat?'user-hit':'user-miss'}`;beatHits.push({beat:beatCount,onBeat,score:lastScore});}
+      else tickEl.className='beat-tick on-beat';}
+  },msPerBeat);
+}
+function stopBeat(){clearInterval(beatInterval);}
+function adjustBPM(delta){bpm=Math.max(60,Math.min(200,bpm+delta));document.getElementById('bpmVal').textContent=bpm;document.getElementById('bpmDisplay').textContent=`${bpm} BPM`;}
+
+// ═══════════════════════════════════════
+// REMIX
+// ═══════════════════════════════════════
+function buildRemix(){
+  const r=currentRoutine;
+  if(!r||!lastSessionData){buildDemoRemix();return;}
+  document.getElementById('remixRoutineLabel').textContent=r.title+' · '+r.bpm+' BPM';
+  document.getElementById('bpmVal').textContent=r.bpm;bpm=r.bpm;
+  drawStick(document.getElementById('remixUserSVG'),r.poses[0].p,'#34d399',1,160,220);
+  drawStick(document.getElementById('remixTemplateSVG'),r.poses[0].p,'#a78bfa',0.7,160,220);
+  buildBeatMap();buildSyncScores();buildWhatIf();
+}
+function buildDemoRemix(){
+  const r=ROUTINES[2];
+  document.getElementById('remixRoutineLabel').textContent=r.title+' · '+r.bpm+' BPM (DEMO)';
+  drawStick(document.getElementById('remixUserSVG'),'athletic_stance','#34d399',1,160,220);
+  drawStick(document.getElementById('remixTemplateSVG'),'athletic_stance','#a78bfa',0.7,160,220);
+  buildDemoBeatMap();buildDemoSyncScores();buildDemoWhatIf();
+}
+function buildBeatMap(){
+  const mapEl=document.getElementById('beatMap');mapEl.innerHTML='';
+  const hits=beatHits;const beats=Math.max(32,hits.length);
+  for(let i=0;i<Math.min(beats,48);i++){
+    const hit=hits[i];const score=hit?hit.score:Math.round(50+Math.random()*40);const onBeat=hit?hit.onBeat:score>65;
+    const col=document.createElement('div');col.className='beat-col';
+    const h=Math.max(8,(score/100)*44);const color=onBeat?'var(--green)':score>50?'var(--amber)':'var(--red)';
+    col.innerHTML=`<div class="beat-block" style="height:${h}px;background:${color};opacity:.8"></div>`;
+    if(i%4===0) col.innerHTML+=`<div class="beat-label">${i+1}</div>`;
+    mapEl.appendChild(col);
+  }
+}
+function buildDemoBeatMap(){
+  const mapEl=document.getElementById('beatMap');mapEl.innerHTML='';
+  [78,82,55,88,72,91,48,85,76,89,52,84,71,92,60,87,74,88,51,83,69,90,55,86,72,88,49,84,75,91,58,88].forEach((score,i)=>{
+    const col=document.createElement('div');col.className='beat-col';
+    const h=Math.max(8,(score/100)*44);const color=score>65?'var(--green)':score>50?'var(--amber)':'var(--red)';
+    col.innerHTML=`<div class="beat-block" style="height:${h}px;background:${color};opacity:.8"></div>`;
+    if(i%4===0) col.innerHTML+=`<div class="beat-label">${i+1}</div>`;
+    mapEl.appendChild(col);
+  });
+}
+function buildSyncScores(){const d=lastSessionData;buildSyncScoreUI(d?d.avg:0,d?d.beatSync:72,Math.round((100-(d?d.avg:0))*0.4));}
+function buildDemoSyncScores(){buildSyncScoreUI(74,72,10);}
+function buildSyncScoreUI(avg,beatSync,improvement){
+  document.getElementById('syncScoreRow').innerHTML=[
+    ['AVG POSE MATCH',avg+'%',avg>=80?'var(--green)':avg>=60?'var(--amber)':'var(--red)'],
+    ['BEAT SYNC',beatSync+'%',beatSync>=80?'var(--green)':beatSync>=60?'var(--amber)':'var(--red)'],
+    ['POTENTIAL PR GAIN','+'+improvement+'%','var(--purpleL)'],
+  ].map(([lbl,val,color])=>`<div class="sync-metric"><div class="sync-metric-val" style="color:${color}">${val}</div><div class="sync-metric-lbl">${lbl}</div></div>`).join('');
+}
+function buildWhatIf(){
+  const d=lastSessionData;const avg=d?d.avg:74;const beatSync=d?d.beatSync:72;const routineName=currentRoutine?.title||'Hip Hop Basics';
+  const whatIfScore=Math.min(99,Math.round(avg+(100-beatSync)*0.5));const improvement=whatIfScore-avg;
+  document.getElementById('whatIfText').innerHTML=`Your average pose match was <strong style="color:var(--green)">${avg}%</strong>. Beat sync was <strong style="color:var(--amber)">${beatSync}%</strong>. If every transition landed <em>on the beat</em>, score projects to <strong style="color:var(--purpleL)">${whatIfScore}%</strong> — a <strong>+${improvement}%</strong> gain. That's your PR target.`;
+  buildWhatIfChart(avg,beatSync,whatIfScore);
+}
+function buildDemoWhatIf(){
+  document.getElementById('whatIfText').innerHTML=`Demo mode. Avg <strong style="color:var(--green)">74%</strong>, beat sync <strong style="color:var(--amber)">72%</strong>. Full sync projects to <strong style="color:var(--purpleL)">86%</strong> (+12%). Complete a session to see your real analysis.`;
+  buildWhatIfChart(74,72,86);
+}
+function buildWhatIfChart(avg,beatSync,whatIf){
+  const canvas=document.getElementById('whatIfCanvas');const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth||300;canvas.width=W;ctx.clearRect(0,0,W,80);
+  ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(0,0,W,80);
+  const points=40;const simScores=Array.from({length:points},(_,i)=>{return avg+(whatIf-avg)*(i/points)+Math.sin(i*.8)*8+Math.random()*6;});
+  ctx.beginPath();ctx.strokeStyle='#34d399';ctx.lineWidth=2;
+  simScores.forEach((s,i)=>{const x=(i/(points-1))*W;const y=76-(s/100)*64;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+  ctx.beginPath();ctx.strokeStyle='#a78bfa';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  for(let i=0;i<points;i++){const x=(i/(points-1))*W;const y=76-(whatIf/100)*64+Math.sin(i*.4)*3;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#34d399';ctx.font='9px JetBrains Mono';ctx.fillText('YOUR',4,72);
+  ctx.fillStyle='#a78bfa';ctx.fillText('GHOST',4,14);
+}
+function toggleRemixPlay(){
+  if(remixPlaying){remixPlaying=false;clearInterval(remixInterval);document.getElementById('playRemixBtn').textContent='▶ PLAY REMIX';}
+  else{
+    remixPlaying=true;remixPhase=0;document.getElementById('playRemixBtn').textContent='⏹ STOP';
+    const r=currentRoutine||ROUTINES[2];
+    remixInterval=setInterval(()=>{
+      remixPhase+=0.04;
+      const poseCount=r.poses.length;const newIdx=Math.floor(remixPhase/1.5)%poseCount;const nextIdx=(newIdx+1)%poseCount;const t=(remixPhase/1.5)%1;
+      drawStickInterp(document.getElementById('remixUserSVG'),r.poses[newIdx].p,r.poses[nextIdx].p,Math.min(1,t+Math.sin(remixPhase*.3)*.15),'#34d399',1,160,220);
+      drawStickInterp(document.getElementById('remixTemplateSVG'),r.poses[newIdx].p,r.poses[nextIdx].p,Math.min(1,Math.max(0,t*1.15-.05)),'#a78bfa',0.8,160,220);
+      const userScore=Math.round(70+Math.sin(remixPhase)*15+Math.random()*8);
+      document.getElementById('remixUserScore').textContent=`MATCH: ${userScore}%`;
+      document.getElementById('remixTemplateScore').textContent=`TARGET: ${r.instPR}%`;
+    },80);
+  }
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+let dashInited=false;
+const MONTHS=["23-05","23-06","23-07","23-08","23-09","23-10","23-11","23-12","24-01","24-02","24-03","24-04","24-05","24-06","24-07","24-08","24-09","24-10","24-11","24-12","25-01","25-02","25-03","25-04","25-05","25-06","25-07","25-08","25-09","25-10","25-11","25-12","26-01","26-02","26-03"];
+const LEGAL=[1,4,1,2,6,4,5,5,24,22,12,4,16,27,30,41,21,15,35,23,22,59,64,45,52,44,51,46,38,44,42,30,40,54,51];
+const CREATIVE=[28,25,12,18,19,19,17,14,21,20,14,27,27,11,13,6,15,9,16,15,17,5,15,13,16,15,13,28,15,17,15,14,16,12,11];
+const PERSONAL=[16,16,13,17,18,14,15,14,9,13,18,14,12,23,24,19,20,13,18,23,19,16,27,20,25,20,16,21,20,16,18,17,19,19,13];
+const INTEL=[19,18,11,7,13,7,16,21,12,12,10,8,14,6,8,1,4,9,6,5,10,3,3,3,2,5,2,6,5,3,3,0,3,1,3];
+const PROF=[18,13,11,23,12,10,16,18,7,13,7,7,8,18,14,11,9,9,12,25,30,16,14,6,11,10,9,9,17,12,5,10,9,6,7];
+const SPORT=[8,9,10,16,7,8,8,5,9,6,7,9,5,6,9,5,7,9,8,4,8,11,11,6,9,4,5,4,4,4,10,5,5,4,7];
+const STRESS=[-1,5,-1,0,1,6,3,2,3,-2,0,3,1,-12,-8,-6,-2,1,-2,1,0,-14,-12,-7,-9,-5,-8,-6,-4,-9,-14,-11,-9,-7,-7];
+const AVGLENGTH=[320,310,280,340,290,300,310,295,380,420,350,310,360,490,520,610,470,400,550,480,530,780,840,720,760,690,720,710,620,680,810,690,740,820,790];
+
+function initDashboard(){
+  if(dashInited) return;dashInited=true;
+  buildArcChart();buildStressChart();buildLengthChart();buildSportChart();buildWecoinCharts();buildBeatIQChart();
+}
+function showDbPanel(id,btn){
+  document.querySelectorAll('.db-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.db-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');
+}
+const chartDefaults={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a5a80',font:{size:7},maxRotation:45,autoSkip:false}},y:{ticks:{color:'#5a5a80',font:{size:8}},grid:{color:'#1c1c2e'}}}};
+function buildArcChart(){
+  new Chart(document.getElementById('arcChart').getContext('2d'),{type:'bar',data:{labels:MONTHS,datasets:[{label:'Legal',data:LEGAL,backgroundColor:'#378ADD',stack:'s'},{label:'Creative',data:CREATIVE,backgroundColor:'#D85A30',stack:'s'},{label:'Personal',data:PERSONAL,backgroundColor:'#7F77DD',stack:'s'},{label:'Intellectual',data:INTEL,backgroundColor:'#1D9E75',stack:'s'},{label:'Professional',data:PROF,backgroundColor:'#BA7517',stack:'s'},{label:'Sport',data:SPORT,backgroundColor:'#888780',stack:'s'}]},options:{...chartDefaults,plugins:{legend:{display:false},tooltip:{mode:'index'}},scales:{x:{stacked:true,ticks:{color:'#5a5a80',font:{size:7},maxRotation:45,autoSkip:false}},y:{stacked:true,ticks:{color:'#5a5a80',font:{size:8}},max:100,grid:{color:'#1c1c2e'}}}}});
+}
+function buildStressChart(){
+  new Chart(document.getElementById('stressChart').getContext('2d'),{type:'bar',data:{labels:MONTHS,datasets:[{data:STRESS,backgroundColor:STRESS.map(v=>v>=0?'rgba(16,185,129,.7)':'rgba(239,68,68,.7)'),borderRadius:2}]},options:{...chartDefaults,plugins:{legend:{display:false}}}});
+}
+function buildLengthChart(){
+  new Chart(document.getElementById('lengthChart').getContext('2d'),{type:'line',data:{labels:MONTHS,datasets:[{data:AVGLENGTH,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,.1)',fill:true,tension:0.4,pointRadius:2}]},options:chartDefaults});
+}
+function buildSportChart(){
+  new Chart(document.getElementById('sportChart').getContext('2d'),{type:'line',data:{labels:MONTHS,datasets:[{data:SPORT,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.15)',fill:true,tension:0.4,pointRadius:2}]},options:{...chartDefaults,scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,min:0,max:20}}}});
+}
+function buildWecoinCharts(){
+  const days=Array.from({length:30},(_,i)=>(i+1)*10);
+  const users=days.map(d=>Math.min(1e9,Math.round(1000*Math.pow(10,(d/300)*9))));
+  new Chart(document.getElementById('wecoinGrowthChart').getContext('2d'),{type:'line',data:{labels:days.map(d=>`D${d}`),datasets:[{data:users.map(u=>Math.log10(Math.max(1,u))),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:0.4,pointRadius:2}]},options:{...chartDefaults,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=Math.round(Math.pow(10,ctx.raw));return v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(1)+'M':v.toLocaleString();}}}}}}); 
+  const eas=Array.from({length:11},(_,i)=>i);
+  new Chart(document.getElementById('rewardFormulaChart').getContext('2d'),{type:'bar',data:{labels:eas.map(e=>`${e} EAs`),datasets:[{data:eas.map(ea=>3*ea*Math.pow(2,ea)),backgroundColor:eas.map(e=>`hsl(${260+e*10},70%,${50+e*3}%)`),borderRadius:3}]},options:{...chartDefaults,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw.toLocaleString()+' WEC'}}}}});
+}
+function buildBeatIQChart(){
+  const hist=beatIQHistory.length>0?beatIQHistory.map(h=>h.score):[0];
+  new Chart(document.getElementById('beatIQChart').getContext('2d'),{type:'line',data:{labels:hist.map((_,i)=>`S${i+1}`),datasets:[{data:hist,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,.15)',fill:true,tension:0.4,pointRadius:3}]},options:{...chartDefaults,scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,min:0,max:100}}}});
+}
+function updateDashboardSessionLog(){
+  const el=document.getElementById('sessionLog');if(!lastSessionData) return;
+  const{routine,avg,peak,beatSync}=lastSessionData;
+  const existing=el.innerHTML.includes('No sessions')?'':el.innerHTML;
+  el.innerHTML=existing+`<div style="padding:8px 0;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center"><span style="color:var(--txt)">${routine.emoji} ${routine.title}</span><span style="font-family:var(--mono);font-size:10px">AVG <span style="color:var(--purpleL)">${avg}%</span> · PEAK <span style="color:var(--green)">${peak}%</span> · BEAT <span style="color:var(--amber)">${beatSync}%</span></span></div>`;
+  document.getElementById('sessionsCompleted').textContent=sessionsCount;
+  document.getElementById('mvSessions').textContent=sessionsCount;
+  if(beatIQHistory.length>0) document.getElementById('bestBeatIQ').textContent=Math.max(...beatIQHistory.map(h=>h.score))+'%';
+}
+
+// INIT
+buildHome();
+</script>
+
+<!-- Protocol Warning Banner -->
+
+<div id="protocolBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(135deg,#1a0a00,#120000);border-bottom:2px solid var(--amber);padding:14px 16px;flex-direction:column;gap:12px;max-height:70vh;overflow-y:auto;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:20px;flex-shrink:0">⚠️</span>
+      <div>
+        <div id="protoBannerMsg" style="font-size:12px;line-height:1.6;color:var(--amberL)"></div>
+        <div style="font-size:9px;color:var(--dim);margin-top:4px;letter-spacing:.08em">App works in simulation mode — all features except live camera.</div>
+      </div>
+    </div>
+    <button onclick="document.getElementById('protocolBanner').style.display='none'" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:var(--amberL);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:var(--sans);white-space:nowrap;flex-shrink:0">Dismiss</button>
+  </div>
+  <div id="protoOptions" style="display:flex;flex-direction:column;gap:8px"></div>
+</div>
+<style>
+.proto-option{display:flex;gap:10px;align-items:flex-start;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:10px;padding:10px 12px}
+.proto-badge{font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--amber);background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:4px;padding:2px 7px;white-space:nowrap;margin-top:2px;flex-shrink:0}
+.proto-text{font-size:11px;color:var(--dim);line-height:1.6}
+.proto-text strong{color:var(--txt)}
+.proto-text code{background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:10px;color:var(--purpleL)}
+</style>
+<script>
+(function(){
+  const proto=window.location.protocol,host=window.location.hostname;
+  const isLocal=host==='localhost'||host==='127.0.0.1'||host==='';
+  if(proto==='https:'||isLocal) return;
+  const banner=document.getElementById('protocolBanner');
+  banner.style.display='flex';
+  document.getElementById('protoBannerMsg').innerHTML=`<strong>Camera unavailable — ${proto==='file:'?'file://':'HTTP'} detected.</strong><br>Camera requires HTTPS.`;
+  document.getElementById('protoOptions').innerHTML=`<div class="proto-option"><div class="proto-badge">EASIEST</div><div class="proto-text"><strong>Netlify Drop</strong> — drag to <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--purpleL)">netlify.com/drop</a> for instant https://</div></div><div class="proto-option"><div class="proto-badge">GITHUB</div><div class="proto-text"><strong>GitHub Pages</strong> — upload as index.html → Settings → Pages → Deploy from main branch</div></div>`;
+})();
+</script>
+</body>
+</html>
