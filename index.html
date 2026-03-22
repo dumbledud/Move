@@ -159,8 +159,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font
   </div>
   <div class="practice-body">
     <div class="cam-side">
-      <video id="userVideo" autoplay playsinline muted style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
-      <canvas id="poseCanvas" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></canvas>
+      <video id="userVideo" autoplay playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;visibility:hidden;z-index:0"></video>
+      <canvas id="poseCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1"></canvas>
       <div id="camOverlay" class="cam-overlay">
         <div class="loading-ring"></div>
         <p style="margin-top:12px;font-size:11px;color:var(--dim);letter-spacing:.08em">LOADING POSE ENGINE</p>
@@ -825,13 +825,11 @@ function drawStick(el,pose,color='#a78bfa',alpha=1,W=160,H=220){
   const segs=[['lSh','rSh'],['lHi','rHi'],['lSh','lHi'],['rSh','rHi'],['lSh','rHi'],['rSh','lHi'],['lSh','lEl'],['lEl','lWr'],['rSh','rEl'],['rEl','rWr'],['lHi','lKn'],['lKn','lAn'],['rHi','rKn'],['rKn','rAn']];
   const joints=['lSh','rSh','lEl','rEl','lHi','rHi','lKn','rKn','lAn','rAn'];
   const nose=pt('nose');
-  googlyPhase+=.06;
   const hr=12,hcy=nose.y-13;
   const lines=segs.map(([a,b])=>{const pa=pt(a),pb=pt(b);return`<line x1="${pa.x.toFixed(1)}" y1="${pa.y.toFixed(1)}" x2="${pb.x.toFixed(1)}" y2="${pb.y.toFixed(1)}" stroke="${color}" stroke-width="2.5" stroke-linecap="round" opacity="${alpha}"/>`;}).join('');
   const dots=joints.map(k=>{const p=pt(k);return`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${color}" opacity="${alpha}"/>`;}).join('');
-  const head=`<circle cx="${nose.x.toFixed(1)}" cy="${hcy.toFixed(1)}" r="${hr}" fill="${googlyEyes?'rgba(232,228,240,0.08)':'none'}" stroke="${color}" stroke-width="2" opacity="${alpha}"/>`;
-  const eyes=googlyEyes?buildGooglyEyes(nose.x,hcy,hr,googlyPhase,color,alpha):'';
-  el.innerHTML=lines+dots+head+eyes;
+  const head=`<circle cx="${nose.x.toFixed(1)}" cy="${hcy.toFixed(1)}" r="${hr}" fill="none" stroke="${color}" stroke-width="2" opacity="${alpha}"/>`;
+  el.innerHTML=lines+dots+head;
 }
 function drawStickInterp(el,pn,tn,t,color='#a78bfa',alpha=1,W=160,H=220){
   const S=POSES[pn]||POSES.stand_tall,T=POSES[tn]||POSES.stand_tall;
@@ -840,13 +838,11 @@ function drawStickInterp(el,pn,tn,t,color='#a78bfa',alpha=1,W=160,H=220){
   const segs=[['lSh','rSh'],['lHi','rHi'],['lSh','lHi'],['rSh','rHi'],['lSh','lEl'],['lEl','lWr'],['rSh','rEl'],['rEl','rWr'],['lHi','lKn'],['lKn','lAn'],['rHi','rKn'],['rKn','rAn']];
   const joints=['lSh','rSh','lEl','rEl','lHi','rHi','lKn','rKn','lAn','rAn'];
   const nose=pt('nose');
-  googlyPhase+=.06;
   const hr=12,hcy=nose.y-13;
   const lines=segs.map(([a,b])=>{const pa=pt(a),pb=pt(b);return`<line x1="${pa.x.toFixed(1)}" y1="${pa.y.toFixed(1)}" x2="${pb.x.toFixed(1)}" y2="${pb.y.toFixed(1)}" stroke="${color}" stroke-width="2.5" stroke-linecap="round" opacity="${alpha}"/>`;}).join('');
   const dots=joints.map(k=>{const p=pt(k);return`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${color}" opacity="${alpha}"/>`;}).join('');
-  const head=`<circle cx="${nose.x.toFixed(1)}" cy="${hcy.toFixed(1)}" r="${hr}" fill="${googlyEyes?'rgba(232,228,240,0.08)':'none'}" stroke="${color}" stroke-width="2" opacity="${alpha}"/>`;
-  const eyes=googlyEyes?buildGooglyEyes(nose.x,hcy,hr,googlyPhase,color,alpha):'';
-  el.innerHTML=lines+dots+head+eyes;
+  const head=`<circle cx="${nose.x.toFixed(1)}" cy="${hcy.toFixed(1)}" r="${hr}" fill="none" stroke="${color}" stroke-width="2" opacity="${alpha}"/>`;
+  el.innerHTML=lines+dots+head;
 }
 function drawStickFromSnaps(el,snapA,snapB,t,color='#34d399',alpha=1,W=160,H=220){
   if(!snapA||!snapB){drawStick(el,'stand_tall',color,alpha,W,H);return}
@@ -856,21 +852,23 @@ function drawStickFromSnaps(el,snapA,snapB,t,color='#34d399',alpha=1,W=160,H=220
   const joints=['lSh','rSh','lEl','rEl','lHi','rHi','lKn','rKn','lAn','rAn'];
   const lines=segs.map(([a,b])=>{if(!snapA[a]||!snapA[b])return'';const pa=pt(a),pb=pt(b);return`<line x1="${pa.x.toFixed(1)}" y1="${pa.y.toFixed(1)}" x2="${pb.x.toFixed(1)}" y2="${pb.y.toFixed(1)}" stroke="${color}" stroke-width="2.5" stroke-linecap="round" opacity="${alpha}"/>`;}).join('');
   const dots=joints.map(k=>{if(!snapA[k])return'';const p=pt(k);return`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${color}" opacity="${alpha}"/>`;}).join('');
-  let head='',eyes='';
-  if(snapA.nose){const nose=pt('nose');const hcy=nose.y-13;googlyPhase+=.06;head=`<circle cx="${nose.x.toFixed(1)}" cy="${hcy.toFixed(1)}" r="12" fill="${googlyEyes?'rgba(232,228,240,0.08)':'none'}" stroke="${color}" stroke-width="2" opacity="${alpha}"/>`;if(googlyEyes)eyes=buildGooglyEyes(nose.x,hcy,12,googlyPhase,color,alpha);}
-  el.innerHTML=lines+dots+head+eyes;
+  let head='';
+  if(snapA.nose){const nose=pt('nose');const hcy=nose.y-13;head=`<circle cx="${nose.x.toFixed(1)}" cy="${hcy.toFixed(1)}" r="12" fill="none" stroke="${color}" stroke-width="2" opacity="${alpha}"/>`;}
+  el.innerHTML=lines+dots+head;
 }
 
 // ══════════════════════════════════════════════════════
-// GOOGLY TOGGLE
+// GOOGLY TOGGLE — left canvas only
 // ══════════════════════════════════════════════════════
 function toggleGoogly(){
   googlyEyes=!googlyEyes;
   const btn=document.getElementById('googlyBtn');
-  btn.style.border=googlyEyes?'1px solid rgba(167,139,250,.7)':'1px solid rgba(255,255,255,.15)';
-  btn.style.boxShadow=googlyEyes?'0 0 14px rgba(167,139,250,.5)':'none';
-  btn.style.background=googlyEyes?'rgba(124,58,237,.35)':'rgba(8,8,20,.75)';
-  if(currentRoutine)updateTargetPose();
+  if(!btn)return;
+  btn.style.border     = googlyEyes ? '1px solid rgba(52,211,153,.7)'  : '1px solid rgba(255,255,255,.15)';
+  btn.style.boxShadow  = googlyEyes ? '0 0 14px rgba(52,211,153,.5)'   : 'none';
+  btn.style.background = googlyEyes ? 'rgba(16,185,129,.3)'            : 'rgba(8,8,20,.75)';
+  // Eyes live on the canvas (left side) - they appear next time drawLandmarksOnCanvas
+  // or drawStickOnCanvas is called, no SVG redraw needed
 }
 
 // ══════════════════════════════════════════════════════
@@ -1084,7 +1082,6 @@ async function initMediaPipe(){
       });
       const vid=document.getElementById('userVideo');
       vid.srcObject=stream;
-      vid.style.display='block'; // make video visible for drawing
       await vid.play();
 
       // Size canvas to match the cam-side container exactly
@@ -1848,4 +1845,4 @@ checkProtocol();
 buildHome();
 </script>
 </body>
-</html> 
+</html>
