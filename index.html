@@ -39,7 +39,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font
 .practice-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surf);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:10}
 .back-btn{background:none;border:1px solid var(--bdr);color:var(--dim);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--sans)}
 .practice-body{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 90px)}
-.cam-side{position:relative;background:#02020a;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cam-side{position:relative;background:#02020a;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:200px}
 #userVideo{display:none;width:100%;height:100%;object-fit:cover}
 #poseCanvas{width:100%;height:100%;object-fit:cover}
 .cam-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -159,8 +159,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font
   </div>
   <div class="practice-body">
     <div class="cam-side">
-      <video id="userVideo" autoplay playsinline muted></video>
-      <canvas id="poseCanvas" width="480" height="480"></canvas>
+      <video id="userVideo" autoplay playsinline muted style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
+      <canvas id="poseCanvas" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></canvas>
       <div id="camOverlay" class="cam-overlay">
         <div class="loading-ring"></div>
         <p style="margin-top:12px;font-size:11px;color:var(--dim);letter-spacing:.08em">LOADING POSE ENGINE</p>
@@ -176,7 +176,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font
       <div style="position:absolute;bottom:4px;left:8px;font-size:8px;color:var(--dim);letter-spacing:.1em" id="camLabel">YOUR CAMERA</div>
       <div id="simBadge" style="display:none;position:absolute;top:8px;right:8px;font-size:8px;color:var(--amber);background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);padding:3px 8px;border-radius:4px">⚠ SIM MODE</div>
       <!-- GooglEii button top -->
-      <button id="googlyBtn" onclick="toggleGoogly()" style="position:absolute;top:8px;left:8px;z-index:15;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;background:rgba(8,8,20,.75);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);transition:all .15s;line-height:1"><span style="color:#f59e0b">G</span><span style="color:#ec4899">o</span><span style="color:#a78bfa">o</span><span style="color:#34d399">g</span><span style="color:#60a5fa">l</span><span style="color:#f59e0b">E</span><span style="color:#ec4899">i</span><span style="color:#a78bfa">i</span></button>
+      <button id="googlyBtn" onclick="toggleGoogly()" style="position:absolute;top:8px;left:8px;z-index:15;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;background:rgba(8,8,20,.75);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);transition:all .15s;line-height:1"><span style="color:#34d399">G</span><span style="color:#f59e0b">o</span><span style="color:#3b82f6">o</span><span style="color:#ef4444">g</span><span style="color:#34d399">l</span><span style="color:#f59e0b">E</span><span style="color:#3b82f6">i</span><span style="color:#ef4444">i</span></button>
     </div>
     <div class="target-side">
       <div id="targetLabelEl" style="font-size:9px;letter-spacing:.14em;color:var(--purpleL)">TARGET POSE</div>
@@ -966,6 +966,13 @@ async function startSession(){
   bpm=currentRoutine.bpm;
   document.getElementById('bpmDisplay').textContent=`${bpm} BPM`;
   document.getElementById('bpmVal').textContent=bpm;
+
+  // Resize pose canvas to actual container dimensions before camera starts
+  const canvas=document.getElementById('poseCanvas');
+  const camSide=canvas.closest('.cam-side')||canvas.parentElement;
+  const rect=camSide.getBoundingClientRect();
+  if(rect.width>0){canvas.width=rect.width;canvas.height=rect.height;}
+
   const got=await initMediaPipe();
   simMode=!got;
   document.getElementById('camOverlay').style.display='none';
@@ -1062,16 +1069,47 @@ function saveAndGoHome(){stopSession();showScreen('home');buildHome();updateSess
 async function initMediaPipe(){
   return new Promise(async resolve=>{
     try{
-      if(typeof window.Pose==='undefined'){resolve(false);return;}
-      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+      // Wait for MediaPipe scripts to fully load (up to 10s)
+      let attempts=0;
+      while((typeof window.Pose==='undefined'||typeof window.Camera==='undefined')&&attempts<40){
+        await new Promise(r=>setTimeout(r,250));attempts++;
+      }
+      if(typeof window.Pose==='undefined'||typeof window.Camera==='undefined'){
+        console.warn('MediaPipe not loaded');resolve(false);return;
+      }
+
+      // Get camera stream
+      const stream=await navigator.mediaDevices.getUserMedia({
+        video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false
+      });
       const vid=document.getElementById('userVideo');
-      vid.srcObject=stream;await vid.play();
-      const pose=new window.Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
-      pose.setOptions({modelComplexity:1,smoothLandmarks:true,minDetectionConfidence:.6,minTrackingConfidence:.5,enableSegmentation:false});
-      const canvas=document.getElementById('poseCanvas'),ctx=canvas.getContext('2d');
+      vid.srcObject=stream;
+      vid.style.display='block'; // make video visible for drawing
+      await vid.play();
+
+      // Size canvas to match the cam-side container exactly
+      const canvas=document.getElementById('poseCanvas');
+      const camSide=canvas.closest('.cam-side')||canvas.parentElement;
+      const rect=camSide.getBoundingClientRect();
+      canvas.width =rect.width  ||480;
+      canvas.height=rect.height ||480;
+      const ctx=canvas.getContext('2d');
+
+      const pose=new window.Pose({
+        locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`
+      });
+      pose.setOptions({
+        modelComplexity:1,smoothLandmarks:true,
+        minDetectionConfidence:.55,minTrackingConfidence:.5,
+        enableSegmentation:false,
+      });
+
       pose.onResults=results=>{
         const W=canvas.width,H=canvas.height;
-        ctx.save();ctx.clearRect(0,0,W,H);ctx.scale(-1,1);ctx.translate(-W,0);
+        ctx.save();
+        ctx.clearRect(0,0,W,H);
+        // Draw video mirrored
+        ctx.scale(-1,1);ctx.translate(-W,0);
         if(results.image)ctx.drawImage(results.image,0,0,W,H);
         ctx.restore();
         if(results.poseLandmarks){
@@ -1079,15 +1117,39 @@ async function initMediaPipe(){
           drawLandmarksOnCanvas(ctx,results.poseLandmarks,W,H);
           if(currentRoutine){
             const cp=currentRoutine.poses[poseIdx];
-            if(cp){const s=calcScore(results.poseLandmarks,cp.p);if(s!==null){updateLiveScore(s);sessionScores.push(s);const now=Date.now()-sessionStart,last=recordedPoses.length>0?recordedPoses[recordedPoses.length-1].time:-999;if(now-last>=80)recordedPoses.push({poseIdx,score:s,time:now,lm:snapshotLandmarks(results.poseLandmarks)});}}
+            if(cp){
+              const s=calcScore(results.poseLandmarks,cp.p);
+              if(s!==null){
+                updateLiveScore(s);
+                sessionScores.push(s);
+                const now=Date.now()-sessionStart;
+                const last=recordedPoses.length>0?recordedPoses[recordedPoses.length-1].time:-999;
+                if(now-last>=80)recordedPoses.push({poseIdx,score:s,time:now,lm:snapshotLandmarks(results.poseLandmarks)});
+              }
+            }
           }
         }
       };
+
       poseDetector=pose;
-      const camera=new window.Camera(vid,{onFrame:async()=>{if(poseDetector)try{await poseDetector.send({image:vid});}catch(e){}},width:640,height:480});
-      camera.start();cameraInstance=camera;
+
+      // Use MediaPipe Camera utility — handles the frame loop
+      const camera=new window.Camera(vid,{
+        onFrame:async()=>{
+          if(poseDetector&&(sessionMode==='active'||sessionMode==='countdown')){
+            try{await poseDetector.send({image:vid});}catch(e){}
+          }
+        },
+        width:640,height:480
+      });
+      camera.start();
+      cameraInstance=camera;
       resolve(true);
-    }catch(e){console.warn('Pose init failed:',e);resolve(false);}
+
+    }catch(e){
+      console.warn('Camera/Pose init failed:',e);
+      resolve(false);
+    }
   });
 }
 
@@ -1786,4 +1848,4 @@ checkProtocol();
 buildHome();
 </script>
 </body>
-</html>
+</html> 
